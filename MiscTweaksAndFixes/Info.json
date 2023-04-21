@@ -1,0 +1,12 @@
+{
+  "Id": "MiscTweaksAndFixes",
+  "Version": "2.0.0-dev",
+  "AssemblyName": "MicroWrath.Loader.dll",
+  "EntryMethod": "MicroWrath.MicroMod.Load",
+
+  "DisplayName": "Miscellaneous Tweaks and Fixes",
+
+  "Author": "microsoftenator",
+
+  "Requirements": [ "ModMenu-1.3.0" ]
+}
