@@ -5,12 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Kingmaker.Blueprints;
+using Kingmaker.Blueprints.Classes;
 using Kingmaker.Designers.Mechanics.Facts;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
 
 using MicroWrath;
 using MicroWrath.BlueprintsDb;
+using MicroWrath.BlueprintInitializationContext;
 using MicroWrath.Constructors;
+using MicroWrath.Util;
 
 namespace MiscTweaksAndFixes.Fixes
 {
@@ -44,19 +47,17 @@ namespace MiscTweaksAndFixes.Fixes
         {
             if (!Enabled) return;
 
-            PatchContext.AddBlueprint(BlueprintsDb.Owlcat.BlueprintBuff.StrengthBlessingMajorBuff)
+            PatchContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintBuff.StrengthBlessingMajorBuff)
                 .Select(bp =>
                 {
                     MicroLogger.Debug(() => $"{nameof(StrengthBlessingMajorHeavyArmor)}");
 
-                    //var aspr = Construct.New.Component<ArmorSpeedPenaltyRemoval>();
-                    //var haspr = Construct.New.Component<HeavyArmorSpeedPenaltyRemoval>();
-                    
                     bp.RemoveComponents(c => c is ArmorSpeedPenaltyRemoval);
                     bp.AddNewComponent<HeavyArmorSpeedPenaltyRemoval>();
+
+                    return bp;
                 })
                 .Register();
-
         }
     }
 }

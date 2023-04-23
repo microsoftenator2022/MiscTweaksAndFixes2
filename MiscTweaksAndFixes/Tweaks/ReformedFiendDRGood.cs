@@ -13,6 +13,7 @@ using Kingmaker.UnitLogic.FactLogic;
 
 using MicroWrath;
 using MicroWrath.BlueprintsDb;
+using MicroWrath.BlueprintInitializationContext;
 using MicroWrath.Constructors;
 using MicroWrath.Util;
 
@@ -29,7 +30,7 @@ namespace MiscTweaksAndFixes.Tweaks
         [Init]
         public static void Init()
         {
-            PatchContext.AddBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.ReformedFiendDamageReductionFeature)
+            PatchContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.ReformedFiendDamageReductionFeature)
                 .Select(bp =>
                 {
                     if (!Enabled) return;
