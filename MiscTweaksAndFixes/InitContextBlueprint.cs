@@ -9,7 +9,7 @@ using Kingmaker.Blueprints;
 using MicroWrath;
 using MicroWrath.Constructors;
 
-namespace MicroWrath
+namespace MicroWrath.BlueprintInitializationContext
 {
     internal partial class BlueprintInitializationContext
     {

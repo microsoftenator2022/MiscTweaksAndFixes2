@@ -13,7 +13,7 @@ using MicroWrath.Util;
 using MiscTweaksAndFixes;
 using Kingmaker.Utility;
 
-namespace MicroWrath
+namespace MicroWrath.BlueprintInitializationContext
 {
 
     internal partial class BlueprintInitializationContext
@@ -85,7 +85,7 @@ namespace MicroWrath
         /// <typeparam name="TBlueprint">Blueprint type</typeparam>
         /// <param name="blueprint">IMicroBlueprint blueprint reference</param>
         /// <returns>Blueprint initialization context for additional initialization steps</returns>
-        public ContextInitializer<TBlueprint> AddBlueprint<TBlueprint>(IMicroBlueprint<TBlueprint> blueprint)
+        public ContextInitializer<TBlueprint> GetBlueprint<TBlueprint>(IMicroBlueprint<TBlueprint> blueprint)
             where TBlueprint : SimpleBlueprint =>
             new BlueprintInit<TBlueprint>(this, Enumerable.Empty<IInitContextBlueprint>(), () => blueprint.ToReference());
 

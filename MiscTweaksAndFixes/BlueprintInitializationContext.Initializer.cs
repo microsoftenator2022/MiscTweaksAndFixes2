@@ -7,7 +7,7 @@ using Kingmaker.Blueprints;
 
 using MicroWrath.Util.Linq;
 
-namespace MicroWrath
+namespace MicroWrath.BlueprintInitializationContext
 {
     internal static class BlueprintInitializationContextExtension
     {
@@ -16,11 +16,11 @@ namespace MicroWrath
             BlueprintInitializationContext.ContextInitializer<TOther> other) =>
             obj.Select(() => new object()).Combine(other).Select(x => x.Item2);
 
-        internal static BlueprintInitializationContext.ContextInitializer<TBlueprint> AddBlueprint<TBlueprint>(
+        internal static BlueprintInitializationContext.ContextInitializer<TBlueprint> GetBlueprint<TBlueprint>(
             this BlueprintInitializationContext.ContextInitializer obj,
             IMicroBlueprint<TBlueprint> blueprint)
             where TBlueprint : SimpleBlueprint =>
-            obj.Select(() => new object()).AddBlueprint(blueprint).Select(x => x.Item2);
+            obj.Select(() => new object()).GetBlueprint(blueprint).Select(x => x.Item2);
 
         internal static BlueprintInitializationContext.ContextInitializer<IEnumerable<TBlueprint>> Combine<TBlueprint>(
             this IEnumerable<BlueprintInitializationContext.ContextInitializer<TBlueprint>> bpcs)
@@ -51,9 +51,9 @@ namespace MicroWrath
             public abstract ContextInitializer<TResult> Select<TResult>(Func<T, TResult> selector);
             public abstract ContextInitializer<(T, TOther)> Combine<TOther>(ContextInitializer<TOther> other);
 
-            public virtual ContextInitializer<(T, TBlueprint)> AddBlueprint<TBlueprint>(IMicroBlueprint<TBlueprint> blueprint)
+            public virtual ContextInitializer<(T, TBlueprint)> GetBlueprint<TBlueprint>(IMicroBlueprint<TBlueprint> blueprint)
                 where TBlueprint : SimpleBlueprint =>
-                this.Combine(InitContext.AddBlueprint(blueprint));
+                this.Combine(InitContext.GetBlueprint(blueprint));
         }
 
         private interface IBlueprintInit
