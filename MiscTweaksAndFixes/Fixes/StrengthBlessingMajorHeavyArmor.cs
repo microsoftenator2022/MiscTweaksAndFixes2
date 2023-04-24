@@ -12,8 +12,7 @@ using Kingmaker.UnitLogic.Buffs.Blueprints;
 using MicroWrath;
 using MicroWrath.BlueprintsDb;
 using MicroWrath.BlueprintInitializationContext;
-using MicroWrath.Constructors;
-using MicroWrath.Util;
+using MicroWrath.Extensions;
 
 namespace MiscTweaksAndFixes.Fixes
 {
@@ -53,7 +52,7 @@ namespace MiscTweaksAndFixes.Fixes
                     MicroLogger.Debug(() => $"{nameof(StrengthBlessingMajorHeavyArmor)}");
 
                     bp.RemoveComponents(c => c is ArmorSpeedPenaltyRemoval);
-                    bp.AddNewComponent<HeavyArmorSpeedPenaltyRemoval>();
+                    bp.AddComponent<HeavyArmorSpeedPenaltyRemoval>();
 
                     return bp;
                 })
