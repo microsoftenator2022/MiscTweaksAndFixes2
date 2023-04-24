@@ -31,7 +31,7 @@ namespace MiscTweaksAndFixes.Tweaks
         public static void Init()
         {
             PatchContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.ReformedFiendDamageReductionFeature)
-                .Select(bp =>
+                .Map(bp =>
                 {
                     if (!Enabled) return;
 

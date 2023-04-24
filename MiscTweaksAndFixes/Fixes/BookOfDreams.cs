@@ -37,7 +37,7 @@ namespace MiscTweaksAndFixes.Fixes
             if (!Enabled) return;
 
             PatchContext.GetBlueprint(new MicroBlueprint<BlueprintPlayerUpgrader>(BookOfDreamsItemConvert_v2))
-                .Select(bp =>
+                .Map(bp =>
                 {
                     MicroLogger.Debug(() => $"{nameof(BookOfDreams)}");
 

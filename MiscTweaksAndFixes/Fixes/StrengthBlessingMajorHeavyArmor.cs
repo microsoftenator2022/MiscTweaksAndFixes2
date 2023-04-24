@@ -48,7 +48,7 @@ namespace MiscTweaksAndFixes.Fixes
             if (!Enabled) return;
 
             PatchContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintBuff.StrengthBlessingMajorBuff)
-                .Select(bp =>
+                .Map(bp =>
                 {
                     MicroLogger.Debug(() => $"{nameof(StrengthBlessingMajorHeavyArmor)}");
 
