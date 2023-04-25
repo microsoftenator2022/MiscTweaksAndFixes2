@@ -6,8 +6,6 @@ using System.Linq;
 
 using Wat.Extensions;
 
-using static Kingmaker.Cheats.StateExplorer.CustomIndexers;
-
 namespace Wat
 {
     internal class Stack<T> : IEnumerable<T>
@@ -122,7 +120,7 @@ namespace Wat
             stream = s;
         }
 
-        public static Wad Open(string path) => new Wad(path);
+        public static Wad Open(string path) => new(path);
 
         private WadHeader? header;
 
