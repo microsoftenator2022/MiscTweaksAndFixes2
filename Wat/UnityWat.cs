@@ -5,15 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 
 using UnityEngine;
+using Wat;
 
-namespace Wat
-{   
-    public static class UnityWat
+namespace UnityWat
+{
+    // TODO: Replace with compute shader?
+    internal static class UnityWat
     {
         //internal static Palette GetPalette(int number = 0) => new(Properties.Resources.PLAYPAL, number);
         
-        // TODO: Replace with compute shader?
-        public static Texture2D WriteToTexture(this PatchImage patch, Texture2D texture, Palette palette)
+        internal static Texture2D WriteToTexture(this PatchImage patch, Texture2D texture, Palette palette)
         {
             if (patch.Width > texture.width || patch.Height > texture.height) throw new ArgumentException();
 
@@ -37,7 +38,7 @@ namespace Wat
         //internal static Texture2D WriteToTexture(this PatchImage patch, Texture2D texture) =>
         //    WriteToTexture(patch, texture, GetPalette());
 
-        public static Texture2D CreateTextureWithBackround(this PatchImage patch, PatchImage background, Palette palette, int xOffset = -1, int yOffset = -1)
+        internal static Texture2D CreateTextureWithBackround(this PatchImage patch, PatchImage background, Palette palette, int xOffset = -1, int yOffset = -1)
         {
             if (background.Width < patch.Width || background.Height < patch.Height) throw new ArgumentException();
 
@@ -73,7 +74,7 @@ namespace Wat
         //internal static Texture2D CreateTextureWithBackround(this PatchImage patch, PatchImage background) =>
         //    CreateTextureWithBackround(patch, background, GetPalette());
 
-        public static Texture2D CreateTexture(this PatchImage patch, Palette palette)
+        internal static Texture2D CreateTexture(this PatchImage patch, Palette palette)
         {
             var texture = new Texture2D(patch.Width, patch.Height, TextureFormat.RGBA32, false);
             texture.filterMode = FilterMode.Point;
@@ -85,7 +86,7 @@ namespace Wat
 
         //internal static Texture2D CreateTexture(this PatchImage patch) => CreateTexture(patch, GetPalette());
 
-        public static Texture2D CreateTexture(byte[] bytes, Palette palette) =>
+        internal static Texture2D CreateTexture(byte[] bytes, Palette palette) =>
             CreateTexture(new PatchImage(bytes), palette);
 
         //internal static Texture2D CreateTexture(byte[] bytes) => CreateTexture(bytes, GetPalette());
