@@ -18,6 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="AddedContent\RipAndTear\Resources\*.*" />
     <AdditionalFiles Include="$(WrathPath)\Bundles\cheatdata.json" />
   </ItemGroup>
 
@@ -48,6 +49,7 @@
     <ProjectReference Include="..\..\MicroWrath\MicroWrath.Generator\MicroWrath.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\MicroWrath\MicroWrath.Loader\MicroWrath.Loader.csproj" />
     <ProjectReference Include="..\..\MicroWrath\MicroWrath\MicroWrath.csproj" />
+    <ProjectReference Include="..\Wat\Wat.csproj" />
   </ItemGroup>
   
   <ItemGroup>

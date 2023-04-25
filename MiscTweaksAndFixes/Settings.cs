@@ -17,11 +17,42 @@ using MicroWrath.Localization;
 using MiscTweaksAndFixes.Fixes;
 using MiscTweaksAndFixes.Tweaks;
 using MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking;
+using UnityModManagerNet;
+using MiscTweaksAndFixes.AddedContent.RipAndTear;
 
 namespace MiscTweaksAndFixes
 {
+    //[EnableReloading]
     internal static partial class Settings
     {
+        // Proof of concept. UMM can have multiple entry points to one assembly
+        internal static void EnableDebugLogging(UnityModManager.ModEntry modEntry)
+        {
+            modEntry.OnUnload = _ => DisableDebugLogging();
+
+            modEntry.OnToggle = (modEntry, state) =>
+            {
+                if (state)
+
+                {
+                    modEntry.Logger.Log("Enabling debug logging");
+                
+                    DebugLogging = true;
+                }
+                else
+                {
+                    modEntry.Logger.Log("Disabling debug logging");
+
+                    DebugLogging = false;
+                }
+
+                return true;
+            };
+            
+        }
+
+        internal static bool DisableDebugLogging() => true;
+
         private static bool debugLogging;
         public static bool DebugLogging
         {
@@ -69,7 +100,6 @@ namespace MiscTweaksAndFixes
                 description: LocalizedStrings.Settings_BookOfDreamsToggleDescription,
                 longDescription: LocalizedStrings.Settings_BookOfDreamsToggleLongDescription)
             .OnValueChanged(newValue => BookOfDreams.Enabled = newValue);
-
 
         [LocalizedString]
         public const string ReformedFiendDRToggleDescription = "Reformed Fiend DR/good";
@@ -150,6 +180,20 @@ namespace MiscTweaksAndFixes
             .OnValueChanged(newValue => DollRoomFilters.SlopePowerOffsetFilter = newValue);
 
         [LocalizedString]
+        public const string RipAndTearHeader = "Rip and tear";
+        [LocalizedString]
+        public const string RipAndTearDescription = "Rip and Tear";
+        [LocalizedString]
+        public const string RipAndTearLongDescription = "RIP AND TEAR";
+        private static Toggle RipAndTearToggle =>
+            CreateSettingToggle(
+                nameof(RipAndTear),
+                defaultValue: true,
+                description: LocalizedStrings.Settings_RipAndTearDescription,
+                longDescription: LocalizedStrings.Settings_RipAndTearLongDescription)
+            .OnValueChanged(newValue => RipAndTear.Enabled = newValue);
+
+        [LocalizedString]
         public const string Title = "Miscellaneous Tweaks & Fixes";
         [LocalizedString]
         public const string FixesSubHeading = "Fixes";
@@ -176,6 +220,9 @@ namespace MiscTweaksAndFixes
                 .AddSubHeader(LocalizedStrings.Settings_DollroomFilters)
                 .AddToggle(DollRoomColorAdjustmentsFilterToggle)
                 .AddToggle(DollRoomSlopePowerOffsetFilterToggle)
+
+                .AddSubHeader(LocalizedStrings.Settings_RipAndTearHeader)
+                .AddToggle(RipAndTearToggle)
 
                 .AddSubHeader(LocalizedStrings.Settings_DebugSubHeading)
                 .AddToggle(DebugLogToggle);
