@@ -31,8 +31,6 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
 {
     internal static partial class RipAndTear
     {
-        internal static bool Enabled = true;
-
         internal static class PortraitOverlay
         {            
             private static readonly Regex ResourceNameRegex = new(@"\G(?:(?:[^\.]+\.)*[^\.]+)\.(?:RipAndTear\.Resources)\.([^\.]+)\z");

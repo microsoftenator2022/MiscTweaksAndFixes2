@@ -40,6 +40,15 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
 {
     internal static partial class RipAndTear
     {
+        private static bool enabled = true;
+        internal static bool Enabled
+        {
+            get => enabled; set
+            {
+                enabled = value;
+            }
+        }
+
         [HarmonyPatch]
         private class Patches
         {
@@ -64,8 +73,6 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
             private static void OnBindViewImplementation<TBuffView>(PartyCharacterView<TBuffView> __instance)
                 where TBuffView : ViewBase<UnitBuffPartVM>
             {
-                MicroLogger.Debug(() => $"{__instance.GetType()}");
-
 
                 MicroLogger.Debug(() => $"Adding protrait overlays");
 
@@ -229,6 +236,12 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
 
             private void TryActivate()
             {
+                if (!Enabled)
+                {
+                    Deactivate();
+                    return;
+                }
+
                 if (Unit.Buffs.RawFacts.FirstOrDefault(buff => buff.Blueprint.AssetGuid == buffBp.BlueprintGuid) is not Buff buff)
                 {
                     Deactivate();
@@ -455,6 +468,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
         }
 
         private static readonly IMicroBlueprint<BlueprintBuff> buffBp = new MicroBlueprint<BlueprintBuff>("03ABBCCA-C01C-4057-A183-9CB20B3D4C8C");
+        
 
         [Init]
         internal static void CreateEnchant()
