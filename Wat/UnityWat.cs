@@ -5,12 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 using UnityEngine;
-using Wat;
 
-namespace UnityWat
-{
-    // TODO: Replace with compute shader?
-    internal static class UnityWat
+namespace Wat
+{   
+    public static class UnityWat
     {
         // TODO: Replace with compute shader?
         public static Texture2D WriteToTexture(this PatchImage patch, Texture2D texture, Palette palette)

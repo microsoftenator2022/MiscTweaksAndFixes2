@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+
+using UnityEngine;
 
 using MicroWrath.Util;
 using MicroWrath.Util.Linq;
@@ -31,7 +32,7 @@ namespace Wat
     //        mx => mx.HasValue ? Maybe<T2>.Just(f(mx.Value)) : Maybe<T2>.Nothing;
     //}
 
-    public class Palette
+    public readonly struct Palette
     {
         internal readonly Color32[] Colors = new Color32[256];
 
@@ -96,7 +97,7 @@ namespace Wat
         public Color32 this[PaletteColor c] => Colors[c.Number];
     }
 
-    public class PatchImage
+    public readonly struct PatchImage
     {
         private readonly byte[] bytes;
 
