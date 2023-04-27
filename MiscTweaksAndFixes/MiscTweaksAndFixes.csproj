@@ -29,6 +29,7 @@
     <Reference Include="Owlcat.Runtime.Core" HintPath="$(WrathPath)\Wrath_Data\Managed\Owlcat.Runtime.Core.dll" Private="False" />
     <Reference Include="Owlcat.Runtime.Visual" HintPath="$(WrathPath)\Wrath_Data\Managed\Owlcat.Runtime.Visual.dll" Private="False" />
     <Reference Include="Owlcat.Runtime.UI" HintPath="$(WrathPath)\Wrath_Data\Managed\Owlcat.Runtime.UI.dll" Private="False" />
+    <Reference Include="Owlcat.Runtime.UniRx" HintPath="$(WrathPath)\Wrath_Data\Managed\Owlcat.Runtime.UniRx.dll" Private="False" />
     <Reference Include="Owlcat.Runtime.Validation" HintPath="$(WrathPath)\Wrath_Data\Managed\Owlcat.Runtime.Validation.dll" Private="False" />
     <Reference Include="Owlcat.SharedTypes" HintPath="$(WrathPath)\Wrath_Data\Managed\Owlcat.SharedTypes.dll" Private="False" />
     <Reference Include="Unity.TextMeshPro" HintPath="$(WrathPath)\Wrath_Data\Managed\Unity.TextMeshPro.dll" Private="False" />
@@ -36,6 +37,7 @@
     <Reference Include="UnityEngine.CoreModule" HintPath="$(WrathPath)\Wrath_Data\Managed\UnityEngine.CoreModule.dll" Private="False" />
     <Reference Include="UnityEngine.IMGUIModule" HintPath="$(WrathPath)\Wrath_Data\Managed\UnityEngine.IMGUIModule.dll" Private="False" />
     <Reference Include="UnityEngine.UI" HintPath="$(WrathPath)\Wrath_Data\Managed\UnityEngine.UI.dll" Private="False" />
+    <Reference Include="UnityEngine.UIModule" HintPath="$(WrathPath)\Wrath_Data\Managed\UnityEngine.UIModule.dll" Private="False" />
     <Reference Include="Unity.RenderPipelines.Core.Runtime" HintPath="$(WrathPath)\Wrath_Data\Managed\Unity.RenderPipelines.Core.Runtime.dll" Private="False" />
     <Reference Include="UniRx" HintPath="$(WrathPath)\Wrath_Data\Managed\UniRx.dll" Private="False" />
     <Reference Include="UnityModManager" HintPath="$(WrathPath)\Wrath_Data\Managed\UnityModManager\UnityModManager.dll" Private="False" />

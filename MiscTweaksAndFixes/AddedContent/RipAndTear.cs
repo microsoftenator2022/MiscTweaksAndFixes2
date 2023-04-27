@@ -29,33 +29,12 @@ using MicroWrath;
 
 namespace MiscTweaksAndFixes.AddedContent.RipAndTear
 {
-    internal static class RipAndTear
+    internal static partial class RipAndTear
     {
-       
         internal static bool Enabled = true;
 
         internal static class PortraitOverlay
-        {
-            [HarmonyPatch(typeof(RootUIContext), nameof(RootUIContext.InitializeUiScene))]
-            internal class RootUIContext_InitializeUiScene_Patch
-            {
-                public static void Postfix(string loadedUIScene)
-                {
-                    MicroLogger.Debug(() => $"{nameof(RootUIContext_InitializeUiScene_Patch)}.{nameof(Postfix)}");
-
-                    MicroLogger.Debug(() => $"Loaded scene '{loadedUIScene}'");
-
-                    foreach (var r in Resources.Where(r => r.Key.StartsWith("S")))
-                    {
-                        MicroLogger.Debug(() => $"{r.Key}: {GetPatchImage(r.Key).Width}x{GetPatchImage(r.Key).Height}");
-                    }
-
-                    if (!Enabled) return;
-
-                    CreatePortraitOverlays();
-                }
-            }
-
+        {            
             private static readonly Regex ResourceNameRegex = new(@"\G(?:(?:[^\.]+\.)*[^\.]+)\.(?:RipAndTear\.Resources)\.([^\.]+)\z");
 
             private static IEnumerable<(string, byte[])> GetResources()
@@ -101,22 +80,19 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
             }
 
             private static PatchImage GetPatchImage(string resourceName) => new(Resources[resourceName]);
-
-            internal static readonly Lazy<Sprite> Face = new(() =>
+            internal static Sprite GetSprite(string resourceName)
             {
-                var pi = GetPatchImage("STFST01");
+                var pi = GetPatchImage(resourceName);
                 var texture = UnityWat.CreateTexture(pi, Palettes[0]);
+                
+                var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
 
-                return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-            });
+                return sprite;
+            }
 
-            internal static readonly Lazy<Sprite> Background = new(() =>
-            {
-                var pi = GetPatchImage("STFB1");
-                var texture = UnityWat.CreateTexture(pi, Palettes[0]);
-
-                return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-            });
+            internal static readonly Lazy<Sprite> Face = new(() => GetSprite("STFST01"));
+            
+            internal static readonly Lazy<Sprite> Background = new(() => GetSprite("STFB1"));
 
             internal static bool SetupBackgroundOverlay(GameObject overlay, GameObject portraitView, Sprite bgSprite)
             {
@@ -126,7 +102,6 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 if (overlay.transform is not RectTransform transform) return false;
 
                 transform.SetParent(portraitView.transform);
-                transform.SetAsLastSibling();
 
                 if (transform.parent.Find("LifePortrait") is RectTransform lifePortraitTransform)
                 {
@@ -137,6 +112,8 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                     transform.offsetMax = lifePortraitTransform.offsetMax;
 
                     transform.localScale = lifePortraitTransform.localScale;
+
+                    transform.SetSiblingIndex(lifePortraitTransform.GetSiblingIndex() + 1);
                 }
 
                 transform.localRotation = Quaternion.identity;
@@ -145,13 +122,13 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 return true;
             }
 
-            internal static bool SetupFaceOverlay(GameObject faceOverlay, GameObject parent, Sprite faceSprite)
+            internal static (bool, Action<Sprite>?) SetupFaceOverlay(GameObject faceOverlay, GameObject parent, Sprite faceSprite)
             {
                 var image = faceOverlay.GetComponent<Image>();
                 image.sprite = faceSprite;
-                image.preserveAspect = true;
+                image.preserveAspect = false;
 
-                if (faceOverlay.transform is not RectTransform transform) return false;
+                if (faceOverlay.transform is not RectTransform transform) return (false, null);
 
                 transform.SetParent(parent.transform);
                 transform.SetAsLastSibling();
@@ -171,7 +148,16 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 transform.sizeDelta = Vector2.zero;
                 transform.pivot = new Vector2(0.5f, 0);
 
-                return true;
+                // Aspect ratio correction
+                var yScale = transform.localScale.y;
+                transform.localScale = new Vector3((float)(yScale / 1.2), yScale);
+    
+                return (true, sprite =>
+                {
+                    var oldSprite = image.sprite;
+                    image.sprite = sprite;
+                    UnityEngine.Object.Destroy(oldSprite); 
+                });
             }
 
             private static GameObject? OverlayBackgroundPrototype;
@@ -181,82 +167,28 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
             internal static GameObject GetOverlayFacePrototype() =>
                 OverlayFacePrototype ??= new("PortraitOverlay", new Type[] { typeof(RectTransform), typeof(Image) });
 
-            public static void CreatePortraitOverlays()
+            private static (GameObject, Action<Sprite>)? CreatePortraitOverlay(GameObject view)
             {
-                if (Game.Instance.RootUiContext.m_UIView is null) return;
+                var backgroundOverlay = UnityEngine.Object.Instantiate(CreateOverlayBackgroundPrototype());
+                var faceOverlay = UnityEngine.Object.Instantiate(GetOverlayFacePrototype());
 
-                var inGamePCView = Game.Instance.RootUiContext.m_UIView.GetComponent<InGamePCView>();
-            
-                var inGameConsoleView = Game.Instance.RootUiContext.m_UIView.GetComponent<InGameConsoleView>();
+                Sprite sprite = Face.Value;
+                var bgSprite = Background.Value;
 
-                var portraits =
-                    inGamePCView?.GetComponentsInChildren<PartyCharacterPCView>()
-                        ?.Select(pc => (vm: pc.GetViewModel() as PartyCharacterVM, view: pc.m_PortraitView.gameObject)) ??
-                    inGameConsoleView?.GetComponentsInChildren<PartyCharacterConsoleView>()
-                        ?.Select(pc => (pc.GetViewModel() as PartyCharacterVM, pc.m_PortraitView.gameObject));
-
-                if (portraits is null) return;
-
-                MicroLogger.Debug(() => "portraits is not null");
-
-                //var overlayFacePrototype = new GameObject("PortraitOverlay", new Type[] { typeof(RectTransform), typeof(Image) });
-
-                foreach (var portrait in portraits)
+                var bgSuccess = SetupBackgroundOverlay(backgroundOverlay, view, bgSprite);
+                var (fgSucc, setSprite) = SetupFaceOverlay(faceOverlay, backgroundOverlay, sprite);
+                if (!bgSuccess || !fgSucc)
                 {
-                    var unit = portrait.vm?.UnitEntityData;
-
-                    if (unit is null || !unit.Body.Head.HasItem) continue;
-
-                    MicroLogger.Debug(() => $"{unit} exists and has head item {unit.Body.Head.Item}");
-                    MicroLogger.Debug(() => $"icon {unit.Body.Head.Item.Icon}");
-
-                    var backgroundOverlay = UnityEngine.Object.Instantiate(CreateOverlayBackgroundPrototype());
-                    var faceOverlay = UnityEngine.Object.Instantiate(GetOverlayFacePrototype());
-
-                    var bgSprite = Background.Value;
-
-                    //if (faceOverlay.transform is not RectTransform transform) continue;
-
-                    var headItem = unit.Body.Head.Item;
-                    var sprite = headItem.Icon;
-
-                    if (headItem.Blueprint == BlueprintsDb.Owlcat.BlueprintItemEquipmentHead.KillerHelm_easterEgg.GetBlueprint())
-                    {
-                        sprite = Face.Value;
-                    }
-
-                    //var image = faceOverlay.GetComponent<Image>();
-
-                    //image.sprite = sprite;
-                    //image.preserveAspect = true;
-
-                    if (!SetupBackgroundOverlay(backgroundOverlay, portrait.view, bgSprite) ||
-                        !SetupFaceOverlay(faceOverlay, backgroundOverlay, sprite))
-                        MicroLogger.Debug(() => "Failed to setup overlay");
-
-                    //transform.SetParent(portrait.view.transform);
-                    //transform.SetAsLastSibling();
-
-                    //if (transform.parent.Find("LifePortrait") is RectTransform lifePortraitTransform)
-                    //{
-                    //    transform.anchorMin = lifePortraitTransform.anchorMin;
-                    //    transform.anchorMax = lifePortraitTransform.anchorMax;
-
-                    //    transform.offsetMin = lifePortraitTransform.offsetMin;
-                    //    transform.offsetMax = lifePortraitTransform.offsetMax;
-
-                    //    transform.localScale = lifePortraitTransform.localScale;
-                    //}
-
-                    //transform.anchorMin = Vector2.zero;
-                    //transform.anchorMax = Vector2.one;
-                    //transform.localRotation = Quaternion.identity;
-                    //transform.sizeDelta = Vector2.zero;
-                    //transform.pivot = new Vector2(0.5f, 0);
-
-                    faceOverlay.SetActive(true);
+                    MicroLogger.Error("Failed to setup overlay");
+                    return null;
                 }
+
+                backgroundOverlay.SetActive(false);
+                return (backgroundOverlay, setSprite!);
             }
+
+            internal static (GameObject, Action<Sprite>)? CreatePortraitOverlay(PartyCharacterPCView view) => CreatePortraitOverlay(view.m_PortraitView.gameObject);
+            internal static (GameObject, Action<Sprite>)? CreatePortraitOverlay(PartyCharacterConsoleView view) => CreatePortraitOverlay(view.m_PortraitView.gameObject);
         }
     }
 }
