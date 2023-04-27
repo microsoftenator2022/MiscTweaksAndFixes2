@@ -73,8 +73,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
             private static void OnBindViewImplementation<TBuffView>(PartyCharacterView<TBuffView> __instance)
                 where TBuffView : ViewBase<UnitBuffPartVM>
             {
-
-                MicroLogger.Debug(() => $"Adding protrait overlays");
+                MicroLogger.Debug(() => $"Adding portrait overlays");
 
                 (GameObject, Action<Sprite>)? overlay = null;
                 if (__instance is PartyCharacterPCView pcView)
@@ -208,7 +207,8 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
 
         }
 
-        public class PortraitOverlayController<TBuffView> : MonoBehaviour, IDisposable, IPortraitOverlayController, IFactCollectionUpdatedHandler where TBuffView : ViewBase<UnitBuffPartVM>
+        public class PortraitOverlayController<TBuffView> : MonoBehaviour, IDisposable, IPortraitOverlayController,
+            IFactCollectionUpdatedHandler where TBuffView : ViewBase<UnitBuffPartVM>
         {
             public PortraitOverlayController(PartyCharacterView<TBuffView> view, (GameObject gameobject, Action<Sprite> setSprite) overlay)
             {
@@ -469,7 +469,6 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
 
         private static readonly IMicroBlueprint<BlueprintBuff> buffBp = new MicroBlueprint<BlueprintBuff>("03ABBCCA-C01C-4057-A183-9CB20B3D4C8C");
         
-
         [Init]
         internal static void CreateEnchant()
         {

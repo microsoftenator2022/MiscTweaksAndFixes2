@@ -19,6 +19,7 @@ using MiscTweaksAndFixes.Tweaks;
 using MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking;
 using UnityModManagerNet;
 using MiscTweaksAndFixes.AddedContent.RipAndTear;
+using MicroWrath.Util;
 
 namespace MiscTweaksAndFixes
 {
@@ -72,7 +73,8 @@ namespace MiscTweaksAndFixes
         private static string SettingsRootKey => $"{Main.Instance.ModEntry.Info.Id}".ToLower();
         private static string SettingKey(string key) => $"{SettingsRootKey}.{key}".ToLower();
 
-        private static Toggle CreateSettingToggle(string name, LocalizedString description, bool defaultValue = true, LocalizedString? longDescription = null)
+        private static Toggle CreateSettingToggle(string name, LocalizedString description,
+            bool defaultValue = true, LocalizedString? longDescription = null, Action<bool>? onChanged = null)
         {
             var key = SettingKey(name);
 
@@ -82,6 +84,12 @@ namespace MiscTweaksAndFixes
 
             if (longDescription is not null)
                 toggle = toggle.WithLongDescription(longDescription);
+
+            if (onChanged is not null)
+            {
+                SettingsLoaded.Take(1).Subscribe(_ => onChanged(ModMenu.ModMenu.GetSettingValue<bool>(key)));
+                toggle = toggle.OnValueChanged(onChanged);
+            }
 
             return toggle;
         }
@@ -98,8 +106,8 @@ namespace MiscTweaksAndFixes
                 nameof(BookOfDreams),
                 defaultValue: true,
                 description: LocalizedStrings.Settings_BookOfDreamsToggleDescription,
-                longDescription: LocalizedStrings.Settings_BookOfDreamsToggleLongDescription)
-            .OnValueChanged(newValue => BookOfDreams.Enabled = newValue);
+                longDescription: LocalizedStrings.Settings_BookOfDreamsToggleLongDescription,
+                onChanged: value => BookOfDreams.Enabled = value);
 
         [LocalizedString]
         public const string ReformedFiendDRToggleDescription = "Reformed Fiend DR/good";
@@ -113,8 +121,8 @@ namespace MiscTweaksAndFixes
                 nameof(ReformedFiendDRGood),
                 defaultValue: false,
                 description: LocalizedStrings.Settings_ReformedFiendDRToggleDescription,
-                longDescription: LocalizedStrings.Settings_ReformedFiendDRToggleLongDescription)
-            .OnValueChanged(newValue => ReformedFiendDRGood.Enabled = newValue);
+                longDescription: LocalizedStrings.Settings_ReformedFiendDRToggleLongDescription,
+                onChanged: value => ReformedFiendDRGood.Enabled = value);
 
         [LocalizedString]
         public const string StrengthBlessingFixToggleDescription = "Major Strength Blessing armor speed fix";
@@ -128,8 +136,8 @@ namespace MiscTweaksAndFixes
                 nameof(StrengthBlessingMajorHeavyArmor),
                 defaultValue: true,
                 description: LocalizedStrings.Settings_StrengthBlessingFixToggleDescription,
-                longDescription: LocalizedStrings.Settings_StrengthBlessingFixToggleLongDescription)
-            .OnValueChanged(newValue => StrengthBlessingMajorHeavyArmor.Enabled = true);
+                longDescription: LocalizedStrings.Settings_StrengthBlessingFixToggleLongDescription,
+                onChanged: value => StrengthBlessingMajorHeavyArmor.Enabled = value);
 
         [LocalizedString]
         public const string DebugLoggingDescription = "Debug Logging";
@@ -137,7 +145,8 @@ namespace MiscTweaksAndFixes
             CreateSettingToggle(
                 nameof(DebugLogging),
                 defaultValue: false,
-                description: LocalizedStrings.Settings_DebugLoggingDescription)
+                description: LocalizedStrings.Settings_DebugLoggingDescription,
+                onChanged: value => DebugLogging = value)
             .OnValueChanged(newValue => DebugLogging = newValue);
 
         [LocalizedString]
@@ -158,8 +167,8 @@ namespace MiscTweaksAndFixes
                 nameof(NaturalWeaponStacking),
                 defaultValue: true,
                 description: LocalizedStrings.Settings_NaturalWeaponStackingDescription,
-                longDescription: LocalizedStrings.Settings_NaturalWeaponStackingLongDescription)
-            .OnValueChanged(newValue => NaturalWeaponStacking.Enabled = newValue);
+                longDescription: LocalizedStrings.Settings_NaturalWeaponStackingLongDescription,
+                onChanged: value => NaturalWeaponStacking.Enabled = value);
 
         [LocalizedString]
         public const string DollRoomColorAdjustmentsFilterToggleDescription = "\"Color Adjustments\"";
@@ -167,8 +176,8 @@ namespace MiscTweaksAndFixes
             CreateSettingToggle(
                 nameof(DollRoomFilters.ColorAdjustmentsFilter),
                 defaultValue: false,
-                description: LocalizedStrings.Settings_DollRoomColorAdjustmentsFilterToggleDescription)
-            .OnValueChanged(newValue => DollRoomFilters.ColorAdjustmentsFilter = newValue);
+                description: LocalizedStrings.Settings_DollRoomColorAdjustmentsFilterToggleDescription,
+                onChanged: value => DollRoomFilters.ColorAdjustmentsFilter = value);
 
         [LocalizedString]
         public const string DollRoomSlopePowerOffsetFilterToggleDescription = "\"Slope Power Offset\"";
@@ -176,8 +185,8 @@ namespace MiscTweaksAndFixes
             CreateSettingToggle(
                 nameof(DollRoomFilters.SlopePowerOffsetFilter),
                 defaultValue: true,
-                description: LocalizedStrings.Settings_DollRoomSlopePowerOffsetFilterToggleDescription)
-            .OnValueChanged(newValue => DollRoomFilters.SlopePowerOffsetFilter = newValue);
+                description: LocalizedStrings.Settings_DollRoomSlopePowerOffsetFilterToggleDescription,
+                onChanged: value => DollRoomFilters.SlopePowerOffsetFilter = value);
 
         [LocalizedString]
         public const string RipAndTearHeader = "Rip and tear";
@@ -190,8 +199,8 @@ namespace MiscTweaksAndFixes
                 nameof(RipAndTear),
                 defaultValue: true,
                 description: LocalizedStrings.Settings_RipAndTearDescription,
-                longDescription: LocalizedStrings.Settings_RipAndTearLongDescription)
-            .OnValueChanged(newValue => RipAndTear.Enabled = newValue);
+                longDescription: LocalizedStrings.Settings_RipAndTearLongDescription,
+                onChanged: value => RipAndTear.Enabled = value);
 
         [LocalizedString]
         public const string Title = "Miscellaneous Tweaks & Fixes";
@@ -226,58 +235,19 @@ namespace MiscTweaksAndFixes
 
                 .AddSubHeader(LocalizedStrings.Settings_DebugSubHeading)
                 .AddToggle(DebugLogToggle);
-
+            
             ModMenu.ModMenu.AddSettings(settings);
+
+            SettingsLoadedEvent();
         }
+
+        private static event Action SettingsLoadedEvent = () => { };
+
+        private static readonly IObservable<Unit> SettingsLoaded =
+            Observable.FromEvent(action => SettingsLoadedEvent += action, action => SettingsLoadedEvent -= action);
 
         [Init]
         internal static void Init() => 
             Triggers.BlueprintsCache_Init_Early.Take(1).Subscribe(_ => SettingsInit());
     }
 }
-
-//                var dollRoomPpColorAdjustmentsFilter =
-//                    CreateSettingToggle(
-//                        $"{nameof(DollRoomFilters.DollRoomFilters.ColorAdjustmentsFilter)}",
-//                        "\"Color Adjustments\"",
-//                        defaultValue: false,
-//                        longDescription: "Enable or disable the \"Color Adjustments\" filter in the \"doll room\".")
-//                    .OnValueChanged(newValue => DollRoomFilters.DollRoomFilters.ColorAdjustmentsFilter = newValue);
-
-//                var dollRoomPpSlopePowerOffsetFilter =
-//                    CreateSettingToggle(
-//                        $"{nameof(DollRoomFilters.DollRoomFilters.SlopePowerOffsetFilter)}",
-//                        "\"Slope Power Offset\"",
-//                        defaultValue: true,
-//                        longDescription: "Enable or disable the \"Slope Power Offset\" filter in the \"doll room\".")
-//                    .OnValueChanged(newValue => DollRoomFilters.DollRoomFilters.ColorAdjustmentsFilter = newValue);
-
-//                var settings =
-//                    SettingsBuilder.New(SettingsRootKey,
-//                        Localization.CreateString(
-//                            $"{nameof(MiscTweaksAndFixes)}.Title",
-//                            "Miscellaneous Tweaks and Fixes"))
-//                    .AddSubHeader(
-//                        Localization.CreateString($"{nameof(Main.Mod.ModEntry.Info.Id)}.Fixes", "Fixes"),
-//                        true)
-//                    //.AddToggle(primalistToggle)
-//                    .AddToggle(bookOfDreamsToggle)
-//                    //.AddToggle(bloodragerDraconicClawsFix)
-//                    .AddToggle(strengthBlessingMajorFixToggle)
-
-//                    .AddSubHeader(
-//                        Localization.CreateString($"{nameof(Main.Mod.ModEntry.Info.Id)}.Tweaks", "Tweaks"),
-//                        true)
-//                    .AddToggle(naturalWeaponStacking)
-//                    .AddToggle(reformedFiendDRToggle)
-
-//                    .AddSubHeader(Localization.CreateString(
-//                        $"{nameof(Main.Mod.ModEntry.Info.Id)}.{nameof(DollRoomFilters)}",
-//                        "Dollroom post-processing filters"), true)
-//                    .AddToggle(dollRoomPpColorAdjustmentsFilter)
-//                    .AddToggle(dollRoomPpSlopePowerOffsetFilter)
-
-//            }
-//        } 
-//    }
-//}
