@@ -419,7 +419,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                     {
                         var camera = Game.GetCamera();
 
-                        var camWidth = camera.pixelWidth;
+                        var camWidth = camera.rect.width;
 
                         var screenPosition = camera.WorldToViewportPoint(sourceUnit.Position);
 
