@@ -462,14 +462,14 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
             }
         }
 
-        private static readonly IMicroBlueprint<BlueprintBuff> buffBp = new MicroBlueprint<BlueprintBuff>("03ABBCCA-C01C-4057-A183-9CB20B3D4C8C");
+        private static readonly IMicroBlueprint<BlueprintBuff> buffBp = new MicroBlueprint<BlueprintBuff>(GeneratedGuid.RipAndTearBuff);
         
         [Init]
         internal static void CreateEnchant()
         {
             var bic = new BlueprintInitializationContext(Triggers.BlueprintsCache_Init);
 
-            var buff = bic.NewBlueprint<BlueprintBuff>("03ABBCCA-C01C-4057-A183-9CB20B3D4C8C", "RipAndTearBuff")
+            var buff = bic.NewBlueprint<BlueprintBuff>(GeneratedGuid.RipAndTearBuff, "RipAndTearBuff")
                 .Map(buff =>
                 {
                     buff.AddComponent<PortraitOverlayComponent>();
@@ -479,7 +479,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                     return buff;
                 });
 
-            var feature = bic.NewBlueprint<BlueprintFeature>("563B8476-B1FE-4314-8D1C-C567FEA0F537", "RipAndTearFeature")
+            var feature = bic.NewBlueprint<BlueprintFeature>(GeneratedGuid.RipAndTearFeature, "RipAndTearFeature")
                 .Combine(buff)
                 .Map(fb =>
                 {
@@ -495,7 +495,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                     return feature;
                 });
 
-            var enchant = bic.NewBlueprint<BlueprintEquipmentEnchantment>("89BF4CDB-9C4D-462E-8271-86FA30B20B33", "RipAndTearEnchant")
+            var enchant = bic.NewBlueprint<BlueprintEquipmentEnchantment>(GeneratedGuid.RipAndTearEnchant, "RipAndTearEnchant")
                 .Combine(feature)
                 .Map(ef =>
                 {

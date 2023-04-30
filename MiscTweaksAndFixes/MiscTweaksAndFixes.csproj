@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <VersionPrefix>2.0.0.2</VersionPrefix>
+    <VersionPrefix>2.0.0.3</VersionPrefix>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -20,6 +20,7 @@
   <ItemGroup>
     <EmbeddedResource Include="AddedContent\RipAndTear\Resources\*.*" />
     <AdditionalFiles Include="$(WrathPath)\Bundles\cheatdata.json" />
+    <AdditionalFiles Include="guids.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -48,22 +49,28 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="ModMenu" HintPath="D:\SteamLibrary\steamapps\common\Pathfinder Second Adventure\Mods\ModMenu\ModMenu.dll" Private="False" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\MicroWrath\MicroWrath.Generator\MicroWrath.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\MicroWrath\MicroWrath.Loader\MicroWrath.Loader.csproj" />
     <ProjectReference Include="..\..\MicroWrath\MicroWrath\MicroWrath.csproj" />
     <ProjectReference Include="..\Wat\Wat.csproj" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <Reference Include="ModMenu" HintPath="D:\SteamLibrary\steamapps\common\Pathfinder Second Adventure\Mods\ModMenu\ModMenu.dll" Private="False" />
-  </ItemGroup>
-  
+
+  <UsingTask TaskName="MicroWrath.Generator.GenerateGuidsFile" AssemblyFile="..\..\MicroWrath\MicroWrath.Generator.Tasks\bin\$(Configuration)\net472\MicroWrath.Generator.Tasks.dll" />
+
   <ItemGroup>
     <None Update="Info.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
+  <Target Name="GenerateGuidsFileTarget" AfterTargets="Build">
+    <GenerateGuidsFile WrathAssembliesPath="$(WrathPath)\Wrath_Data\Managed\" AssemblyPath="$(OutDir)\$(MSBuildProjectName).dll" GuidsFile="guids.json" />
+  </Target>
+  
   <Target Name="Deploy" AfterTargets="Build">
     <ItemGroup>
       <Files Include="$(SolutionDir)\bin\$(Configuration)\$(TargetFramework)\$(MSBuildProjectName)\**\*.*" />
