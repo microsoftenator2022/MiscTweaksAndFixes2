@@ -275,9 +275,6 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 overlayObject.SetActive(false);
             }
 
-            private IDisposable? BuffAddedObserver;
-            private IDisposable? BuffRemovedObserver;
-
             private readonly GameObject overlayObject;
             public readonly Action<Sprite> SetSprite;
 
@@ -293,8 +290,6 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 disposed = true;
 
                 UpdateTimer?.Dispose();
-                BuffAddedObserver?.Dispose();
-                BuffRemovedObserver?.Dispose();
                 EventBusSubscription?.Dispose();
             }
 
