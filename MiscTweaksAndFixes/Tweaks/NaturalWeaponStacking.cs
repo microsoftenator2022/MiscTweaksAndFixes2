@@ -301,6 +301,13 @@ namespace MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking
         {
             if(!Enabled) return false;
 
+            if (unit is null)
+            {
+                MicroLogger.Log($"{nameof(NaturalWeaponStacking)}.{nameof(PatchConditions)}");
+                MicroLogger.Error("unit is null");
+                return false;
+            }
+
             if(!unit.IsPlayerFaction) return false;
             if(unit.IsPet) return false;
             if(unit.Body.IsPolymorphed) return false;
