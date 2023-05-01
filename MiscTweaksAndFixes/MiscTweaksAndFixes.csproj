@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <VersionPrefix>2.0.0.3</VersionPrefix>
+    <VersionPrefix>2.0.0.3dev</VersionPrefix>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -68,7 +68,7 @@
   </ItemGroup>
 
   <Target Name="GenerateGuidsFileTarget" AfterTargets="Build">
-    <GenerateGuidsFile WrathAssembliesPath="$(WrathPath)\Wrath_Data\Managed\" AssemblyPath="$(OutDir)\$(MSBuildProjectName).dll" GuidsFile="guids.json" />
+    <GenerateGuidsFile WrathPath="$(WrathPath)" Assembly="$(OutDir)\$(MSBuildProjectName).dll" GuidsFile="guids.json" />
   </Target>
   
   <Target Name="Deploy" AfterTargets="Build">
