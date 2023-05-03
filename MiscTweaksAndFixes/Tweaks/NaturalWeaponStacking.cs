@@ -59,7 +59,9 @@ namespace MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking
         {
             static Size Postfix(Size size, ItemEntityWeapon __instance)
             {
-                if(!PatchConditions(__instance.Wielder)) return size;
+                DebugWeaponInstance(__instance);
+
+                if (!PatchConditions(__instance.Wielder)) return size;
 
                 var blueprint = __instance.Blueprint;
 
@@ -97,6 +99,8 @@ namespace MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking
                 RuleAttackWithWeapon __instance,
                 out List<(ItemEnchantment, MechanicsContext.Data)> __state)
             {
+                DebugWeaponInstance(__instance.Weapon);
+
                 __state = new();
 
                 var blueprint = __instance.Weapon.Blueprint;
@@ -139,11 +143,11 @@ namespace MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking
 
                 if (__state is null || __state.Count() == 0) return;
 
-                foreach(var enchant in __state)
+                foreach(var (enchantment, contextData) in __state)
                 {
-                    MicroLogger.Debug(() => $"Removing enchant {enchant.enchantment.Name} '{enchant.enchantment.Blueprint.AssetGuid}'");
+                    MicroLogger.Debug(() => $"Removing enchant {enchantment.Name} '{enchantment.Blueprint.AssetGuid}'");
 
-                    __instance.Weapon.RemoveEnchantment(enchant.enchantment);
+                    __instance.Weapon.RemoveEnchantment(enchantment);
                 }
 
                 __state.Clear();
@@ -237,7 +241,6 @@ namespace MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking
 
             var (emptyHandWeapons, secondaryAttacks, additionalLimbs) = GetNaturalWeaponsForUnit(unitData);
 
-
             #region Debug Logging
             if (Settings.DebugLogging)
             {
@@ -296,17 +299,28 @@ namespace MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking
 
         public static bool Enabled { get; internal set; } = true;
 
+        private static void DebugWeaponInstance(ItemEntityWeapon weapon)
+        {
+            if (Settings.DebugLogging)
+            {
+                if (weapon.Wielder is null)
+                {
+                    MicroLogger.Debug(() => $"Wielder is null for weapon {weapon.Name}");
+
+                    if (weapon.Blueprint is BlueprintItemWeapon weaponBp)
+                    {
+                        MicroLogger.Debug(() => $"Blueprint {weaponBp.AssetGuid} ({weaponBp.name})");
+                    }
+                }
+            }
+        }
+
         //TODO: Do these conditions make sense?
         internal static bool PatchConditions(UnitEntityData unit)
         {
             if(!Enabled) return false;
 
-            if (unit is null)
-            {
-                MicroLogger.Log($"{nameof(NaturalWeaponStacking)}.{nameof(PatchConditions)}");
-                MicroLogger.Error("unit is null");
-                return false;
-            }
+            if (unit is null) return false;
 
             if(!unit.IsPlayerFaction) return false;
             if(unit.IsPet) return false;
