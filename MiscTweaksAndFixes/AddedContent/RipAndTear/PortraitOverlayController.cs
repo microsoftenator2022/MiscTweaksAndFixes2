@@ -80,7 +80,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                     overlay = PortraitOverlay.CreatePortraitOverlay(pcView);
                 else if (__instance is PartyCharacterConsoleView consoleView)
                     overlay = PortraitOverlay.CreatePortraitOverlay(consoleView);
-                
+
                 if (overlay is null)
                 {
                     MicroLogger.Error("Failed to add overlay");
@@ -256,7 +256,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
 
                 Activate();
             }
-            
+
             private void Activate()
             {
                 isActive = true;
@@ -305,7 +305,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 get
                 {
                     if (IsDead) return DGFace.STFDEAD00;
-                    
+
                     if (IsGodMode) return DGFace.STFGOD0;
 
                     return currentFace;
@@ -332,7 +332,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 get
                 {
                     if (SoundState.Instance is null || SoundState.Instance.MusicPlayer is null) return false;
-                    
+
                     return SoundState.Instance.MusicPlayer.m_Themes
                         .Where(theme => GodModeMusicThemeEventNames.Contains(theme.StartEvent) && theme.IsSet)
                         .Any();
@@ -421,7 +421,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                         if (screenPosition.x < camWidth / 3)
                             CurrentFace = CurrentFaceSet.FTL;
 
-                        else if  (screenPosition.x > (camWidth * 2) / 3)
+                        else if (screenPosition.x > (camWidth * 2) / 3)
                             CurrentFace = CurrentFaceSet.FTR;
 
                         else CurrentFace = CurrentFaceSet.KILL;
@@ -462,14 +462,14 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
             }
         }
 
-        private static readonly IMicroBlueprint<BlueprintBuff> buffBp = new MicroBlueprint<BlueprintBuff>(GeneratedGuid.RipAndTearBuff);
-        
+        private static readonly IMicroBlueprint<BlueprintBuff> buffBp = new MicroBlueprint<BlueprintBuff>("03ABBCCA-C01C-4057-A183-9CB20B3D4C8C");
+
         [Init]
         internal static void CreateEnchant()
         {
             var bic = new BlueprintInitializationContext(Triggers.BlueprintsCache_Init);
 
-            var buff = bic.NewBlueprint<BlueprintBuff>(GeneratedGuid.RipAndTearBuff, "RipAndTearBuff")
+            var buff = bic.NewBlueprint<BlueprintBuff>("03ABBCCA-C01C-4057-A183-9CB20B3D4C8C", "RipAndTearBuff")
                 .Map(buff =>
                 {
                     buff.AddComponent<PortraitOverlayComponent>();
@@ -479,7 +479,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                     return buff;
                 });
 
-            var feature = bic.NewBlueprint<BlueprintFeature>(GeneratedGuid.RipAndTearFeature, "RipAndTearFeature")
+            var feature = bic.NewBlueprint<BlueprintFeature>("563B8476-B1FE-4314-8D1C-C567FEA0F537", "RipAndTearFeature")
                 .Combine(buff)
                 .Map(fb =>
                 {
@@ -495,7 +495,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                     return feature;
                 });
 
-            var enchant = bic.NewBlueprint<BlueprintEquipmentEnchantment>(GeneratedGuid.RipAndTearEnchant, "RipAndTearEnchant")
+            var enchant = bic.NewBlueprint<BlueprintEquipmentEnchantment>("89BF4CDB-9C4D-462E-8271-86FA30B20B33", "RipAndTearEnchant")
                 .Combine(feature)
                 .Map(ef =>
                 {
