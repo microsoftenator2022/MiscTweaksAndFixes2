@@ -43,10 +43,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
         private static bool enabled = true;
         internal static bool Enabled
         {
-            get => enabled; set
-            {
-                enabled = value;
-            }
+            get => enabled; set => enabled = value;
         }
 
         [HarmonyPatch]
@@ -216,7 +213,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 SetSprite = overlay.setSprite;
                 overlayObject = overlay.gameobject;
 
-                MicroLogger.Debug(() => $"Initializing overlay controller for {Unit.CharacterName}");
+                MicroLogger.Debug(() => $"Initializing overlay controller for {Unit?.CharacterName ?? "<null>"}");
 
                 EventBusSubscription = EventBus.Subscribe(this);
 
@@ -237,6 +234,12 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
             private void TryActivate()
             {
                 if (!Enabled)
+                {
+                    Deactivate();
+                    return;
+                }
+
+                if (Unit is null)
                 {
                     Deactivate();
                     return;
@@ -295,7 +298,21 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
 
             public readonly PartyCharacterView<TBuffView> PartyCharacterView;
 
-            internal UnitEntityData Unit => ((PartyCharacterVM)PartyCharacterView.GetViewModel()).UnitEntityData;
+            internal UnitEntityData? Unit
+            {
+                get
+                {
+                    var unit = ((PartyCharacterVM?)PartyCharacterView?.GetViewModel())?.UnitEntityData;
+
+                    if (unit is null)
+                    {
+                        GameObject.Destroy(this);
+                        return null;
+                    }
+
+                    return unit;
+                }
+            }
 
             private FaceSet CurrentFaceSet = FacesForHP(100);
 
@@ -339,10 +356,16 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 }
             }
 
-            private bool IsDead => Unit.State.IsDead;
+            private bool IsDead => Unit?.State?.IsDead ?? false;
 
             internal void UpdateFaceSet()
             {
+                if (Unit is null)
+                {
+                    Deactivate();
+                    return;
+                }
+
                 var hpPercent = ((Unit.HPLeft + Unit.TemporaryHP) * 100) / Unit.MaxHP;
 
                 CurrentFaceSet = FacesForHP(hpPercent);
