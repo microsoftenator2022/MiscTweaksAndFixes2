@@ -87,6 +87,8 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 var controller = new PortraitOverlayController<TBuffView>(__instance, overlay.Value);
 
                 controller.transform.SetParent(overlay.Value.Item1.transform);
+
+                __instance.AddDisposable(controller);
             }
         }
 
@@ -213,7 +215,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 SetSprite = overlay.setSprite;
                 overlayObject = overlay.gameobject;
 
-                MicroLogger.Debug(() => $"Initializing overlay controller for {Unit?.CharacterName ?? "<null>"}");
+                MicroLogger.Debug(() => $"Initializing overlay controller for {Unit.CharacterName}");
 
                 EventBusSubscription = EventBus.Subscribe(this);
 
@@ -239,11 +241,11 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                     return;
                 }
 
-                if (Unit is null)
-                {
-                    Deactivate();
-                    return;
-                }
+                //if (Unit is null)
+                //{
+                //    Deactivate();
+                //    return;
+                //}
 
                 if (Unit.Buffs.RawFacts.FirstOrDefault(buff => buff.Blueprint.AssetGuid == buffBp.BlueprintGuid) is not Buff buff)
                 {
@@ -286,11 +288,11 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 this.Dispose();
             }
 
-            private bool disposed = true;
+            //private bool disposed = false;
             public void Dispose()
             {
-                if (disposed) return;
-                disposed = true;
+                //if (disposed) return;
+                //disposed = true;
 
                 UpdateTimer?.Dispose();
                 EventBusSubscription?.Dispose();
@@ -298,17 +300,17 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
 
             public readonly PartyCharacterView<TBuffView> PartyCharacterView;
 
-            internal UnitEntityData? Unit
+            internal UnitEntityData Unit
             {
                 get
                 {
-                    var unit = ((PartyCharacterVM?)PartyCharacterView?.GetViewModel())?.UnitEntityData;
+                    var unit = ((PartyCharacterVM)PartyCharacterView.GetViewModel()).UnitEntityData;
 
-                    if (unit is null)
-                    {
-                        GameObject.Destroy(this);
-                        return null;
-                    }
+                    //if (unit is null)
+                    //{
+                    //    GameObject.Destroy(this);
+                    //    return null;
+                    //}
 
                     return unit;
                 }
@@ -356,7 +358,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 }
             }
 
-            private bool IsDead => Unit?.State?.IsDead ?? false;
+            private bool IsDead => Unit.State.IsDead;
 
             internal void UpdateFaceSet()
             {
