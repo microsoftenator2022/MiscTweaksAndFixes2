@@ -84,7 +84,15 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                     return;
                 }
 
-                var controller = new PortraitOverlayController<TBuffView>(__instance, overlay.Value);
+                if (__instance?.ViewModel is not PartyCharacterVM vm || vm.UnitEntityData is null) return;
+                if (__instance.m_BindDisposable
+                    ?.OfType<PortraitOverlayController<TBuffView>>()
+                    ?.FirstOrDefault() is PortraitOverlayController<TBuffView> controller)
+                {
+                    UnityEngine.Object.Destroy(controller);
+                }
+
+                controller = new PortraitOverlayController<TBuffView>(__instance, overlay.Value);
 
                 controller.transform.SetParent(overlay.Value.Item1.transform);
 
@@ -215,17 +223,27 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 SetSprite = overlay.setSprite;
                 overlayObject = overlay.gameobject;
 
-                MicroLogger.Debug(() => $"Initializing overlay controller for {Unit.CharacterName}");
+                var characterName = Unit?.CharacterName ?? "<null>";
+
+                MicroLogger.Debug(() => $"Initializing overlay controller for {characterName}");
 
                 EventBusSubscription = EventBus.Subscribe(this);
 
                 TryActivate();
             }
 
+            public readonly PartyCharacterView<TBuffView> PartyCharacterView;
+
+            private PartyCharacterVM? VM => PartyCharacterView.ViewModel;
+
+            internal UnitEntityData? Unit => VM?.UnitEntityData;
+
             private IDisposable EventBusSubscription;
 
             void IFactCollectionUpdatedHandler.HandleFactCollectionUpdated(EntityFactsProcessor collection)
             {
+                if (Unit is null) return;
+
                 if (collection.Manager.Owner != Unit || collection is not BuffCollection) return;
 
                 TryActivate();
@@ -235,17 +253,11 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
 
             private void TryActivate()
             {
-                if (!Enabled)
+                if (!Enabled || Unit is null)
                 {
                     Deactivate();
                     return;
                 }
-
-                //if (Unit is null)
-                //{
-                //    Deactivate();
-                //    return;
-                //}
 
                 if (Unit.Buffs.RawFacts.FirstOrDefault(buff => buff.Blueprint.AssetGuid == buffBp.BlueprintGuid) is not Buff buff)
                 {
@@ -260,6 +272,18 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 //SoundState.Instance.MusicPlayer.SetCustomStoryTheme("Music_MythicGain_Play", "Music_MythicGain_Stop", null);
 
                 Activate();
+            }
+
+            void OnDisable()
+            {
+                MicroLogger.Debug(() => "Disabled");
+                Deactivate();
+            }
+
+            void OnEnable()
+            {
+                MicroLogger.Debug(() => "Enabled");
+                TryActivate();
             }
 
             private void Activate()
@@ -285,12 +309,16 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
 
             void OnDestroy()
             {
+                MicroLogger.Debug(() => $"Destroyed");
+                Destroy(overlayObject);
                 this.Dispose();
             }
 
             //private bool disposed = false;
             public void Dispose()
             {
+                MicroLogger.Debug(() => $"Disposing portrait controller for {Unit?.CharacterName ?? "<null>"}");
+
                 //if (disposed) return;
                 //disposed = true;
 
@@ -298,23 +326,6 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 EventBusSubscription?.Dispose();
             }
 
-            public readonly PartyCharacterView<TBuffView> PartyCharacterView;
-
-            internal UnitEntityData Unit
-            {
-                get
-                {
-                    var unit = ((PartyCharacterVM)PartyCharacterView.GetViewModel()).UnitEntityData;
-
-                    //if (unit is null)
-                    //{
-                    //    GameObject.Destroy(this);
-                    //    return null;
-                    //}
-
-                    return unit;
-                }
-            }
 
             private FaceSet CurrentFaceSet = FacesForHP(100);
 
@@ -358,7 +369,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 }
             }
 
-            private bool IsDead => Unit.State.IsDead;
+            private bool IsDead => Unit?.State?.IsDead ?? false;
 
             internal void UpdateFaceSet()
             {
