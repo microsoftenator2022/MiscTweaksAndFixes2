@@ -46,59 +46,60 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
             get => enabled; set => enabled = value;
         }
 
-        [HarmonyPatch]
-        private class Patches
-        {
-            [HarmonyPatch(typeof(PartyCharacterPCView), nameof(PartyCharacterPCView.BindViewImplementation))]
-            [HarmonyPostfix]
-            public static void PartyCharacterPCView_BindViewImplementation_Postfix(PartyCharacterPCView __instance)
-            {
-                MicroLogger.Debug(() => $"{nameof(PartyCharacterPCView_BindViewImplementation_Postfix)}");
+        //[HarmonyPatch]
+        //private class Patches
+        //{
+        //    [HarmonyPatch(typeof(PartyCharacterPCView), nameof(PartyCharacterPCView.BindViewImplementation))]
+        //    [HarmonyPostfix]
+        //    public static void PartyCharacterPCView_BindViewImplementation_Postfix(PartyCharacterPCView __instance)
+        //    {
+        //        MicroLogger.Debug(() => $"{nameof(PartyCharacterPCView_BindViewImplementation_Postfix)}");
 
-                OnBindViewImplementation(__instance);
-            }
+        //        OnBindViewImplementation(__instance);
+        //    }
 
-            [HarmonyPatch(typeof(PartyCharacterConsoleView), nameof(PartyCharacterConsoleView.BindViewImplementation))]
-            [HarmonyPostfix]
-            public static void PartyCharacterConsoleView_BindViewImplementation_Postfix(PartyCharacterConsoleView __instance)
-            {
-                MicroLogger.Debug(() => $"{nameof(PartyCharacterConsoleView_BindViewImplementation_Postfix)}");
+        //    [HarmonyPatch(typeof(PartyCharacterConsoleView), nameof(PartyCharacterConsoleView.BindViewImplementation))]
+        //    [HarmonyPostfix]
+        //    public static void PartyCharacterConsoleView_BindViewImplementation_Postfix(PartyCharacterConsoleView __instance)
+        //    {
+        //        MicroLogger.Debug(() => $"{nameof(PartyCharacterConsoleView_BindViewImplementation_Postfix)}");
 
-                OnBindViewImplementation(__instance);
-            }
+        //        OnBindViewImplementation(__instance);
+        //    }
 
-            private static void OnBindViewImplementation<TBuffView>(PartyCharacterView<TBuffView> __instance)
-                where TBuffView : ViewBase<UnitBuffPartVM>
-            {
-                MicroLogger.Debug(() => $"Adding portrait overlays");
+        //    private static void OnBindViewImplementation<TBuffView>(PartyCharacterView<TBuffView> __instance)
+        //        where TBuffView : ViewBase<UnitBuffPartVM>
+        //    {
+        //        MicroLogger.Debug(() => $"Adding portrait overlays");
 
-                (GameObject, Action<Sprite>)? overlay = null;
-                if (__instance is PartyCharacterPCView pcView)
-                    overlay = PortraitOverlay.CreatePortraitOverlay(pcView);
-                else if (__instance is PartyCharacterConsoleView consoleView)
-                    overlay = PortraitOverlay.CreatePortraitOverlay(consoleView);
+        //        if (__instance?.ViewModel is not PartyCharacterVM vm || vm.UnitEntityData is null) return;
+        //        if (__instance.m_BindDisposable
+        //            ?.OfType<PortraitOverlayController<TBuffView>>()
+        //            ?.FirstOrDefault() is PortraitOverlayController<TBuffView> controller)
+        //        {
+        //            UnityEngine.Object.Destroy(controller.overlayObject);
+        //            UnityEngine.Object.Destroy(controller);
+        //        }
 
-                if (overlay is null)
-                {
-                    MicroLogger.Error("Failed to add overlay");
-                    return;
-                }
+        //        (GameObject, Action<Sprite>)? overlay = null;
+        //        if (__instance is PartyCharacterPCView pcView)
+        //            overlay = PortraitOverlay.CreatePortraitOverlay(pcView);
+        //        else if (__instance is PartyCharacterConsoleView consoleView)
+        //            overlay = PortraitOverlay.CreatePortraitOverlay(consoleView);
 
-                if (__instance?.ViewModel is not PartyCharacterVM vm || vm.UnitEntityData is null) return;
-                if (__instance.m_BindDisposable
-                    ?.OfType<PortraitOverlayController<TBuffView>>()
-                    ?.FirstOrDefault() is PortraitOverlayController<TBuffView> controller)
-                {
-                    UnityEngine.Object.Destroy(controller);
-                }
+        //        if (overlay is null)
+        //        {
+        //            MicroLogger.Error("Failed to add overlay");
+        //            return;
+        //        }
 
-                controller = new PortraitOverlayController<TBuffView>(__instance, overlay.Value);
+        //        controller = new PortraitOverlayController<TBuffView>(__instance, overlay.Value);
 
-                controller.transform.SetParent(overlay.Value.Item1.transform);
+        //        controller.transform.SetParent(overlay.Value.Item1.transform);
 
-                __instance.AddDisposable(controller);
-            }
-        }
+        //        __instance.AddDisposable(controller);
+        //    }
+        //}
 
         #region DGFace
         internal enum DGFace
@@ -304,10 +305,10 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 overlayObject.SetActive(false);
             }
 
-            private readonly GameObject overlayObject;
+            internal readonly GameObject overlayObject;
             public readonly Action<Sprite> SetSprite;
 
-            void OnDestroy()
+            internal void OnDestroy()
             {
                 MicroLogger.Debug(() => $"Destroyed");
                 Destroy(overlayObject);
