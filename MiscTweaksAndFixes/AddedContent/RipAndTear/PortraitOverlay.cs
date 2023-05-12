@@ -32,7 +32,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
     internal static partial class RipAndTear
     {
         internal static class PortraitOverlay
-        {            
+        {
             private static readonly Regex ResourceNameRegex = new(@"\G(?:(?:[^\.]+\.)*[^\.]+)\.(?:RipAndTear\.Resources)\.([^\.]+)\z");
 
             private static IEnumerable<(string, byte[])> GetResources()
@@ -82,14 +82,14 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
             {
                 var pi = GetPatchImage(resourceName);
                 var texture = UnityWat.CreateTexture(pi, Palettes[0]);
-                
+
                 var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
 
                 return sprite;
             }
 
             internal static readonly Lazy<Sprite> Face = new(() => GetSprite("STFST01"));
-            
+
             internal static readonly Lazy<Sprite> Background = new(() => GetSprite("STFB1"));
 
             internal static bool SetupBackgroundOverlay(GameObject overlay, GameObject portraitView, Sprite bgSprite)
@@ -149,13 +149,14 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 // Aspect ratio correction
                 var yScale = transform.localScale.y;
                 transform.localScale = new Vector3((float)(yScale / 1.2), yScale);
-    
+
                 return (true, sprite =>
                 {
                     var oldSprite = image.sprite;
                     image.sprite = sprite;
-                    UnityEngine.Object.Destroy(oldSprite); 
-                });
+                    UnityEngine.Object.Destroy(oldSprite);
+                }
+                );
             }
 
             private static GameObject? OverlayBackgroundPrototype;

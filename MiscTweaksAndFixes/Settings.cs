@@ -18,7 +18,7 @@ using MiscTweaksAndFixes.Fixes;
 using MiscTweaksAndFixes.Tweaks;
 using MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking;
 using UnityModManagerNet;
-using MiscTweaksAndFixes.AddedContent.RipAndTear;
+//using MiscTweaksAndFixes.AddedContent.RipAndTear;
 using MicroWrath.Util;
 
 namespace MiscTweaksAndFixes
@@ -194,13 +194,13 @@ namespace MiscTweaksAndFixes
         public const string RipAndTearDescription = "Rip and Tear";
         [LocalizedString]
         public const string RipAndTearLongDescription = "RIP AND TEAR";
-        private static Toggle RipAndTearToggle =>
-            CreateSettingToggle(
-                nameof(RipAndTear),
-                defaultValue: true,
-                description: LocalizedStrings.Settings_RipAndTearDescription,
-                longDescription: LocalizedStrings.Settings_RipAndTearLongDescription,
-                onChanged: value => RipAndTear.Enabled = value);
+        //private static Toggle RipAndTearToggle =>
+        //    CreateSettingToggle(
+        //        nameof(RipAndTear),
+        //        defaultValue: true,
+        //        description: LocalizedStrings.Settings_RipAndTearDescription,
+        //        longDescription: LocalizedStrings.Settings_RipAndTearLongDescription,
+        //        onChanged: value => RipAndTear.Enabled = value);
 
         [LocalizedString]
         public const string Title = "Miscellaneous Tweaks & Fixes";
@@ -230,8 +230,8 @@ namespace MiscTweaksAndFixes
                 .AddToggle(DollRoomColorAdjustmentsFilterToggle)
                 .AddToggle(DollRoomSlopePowerOffsetFilterToggle)
 
-                .AddSubHeader(LocalizedStrings.Settings_RipAndTearHeader)
-                .AddToggle(RipAndTearToggle)
+                //.AddSubHeader(LocalizedStrings.Settings_RipAndTearHeader)
+                //.AddToggle(RipAndTearToggle)
 
                 .AddSubHeader(LocalizedStrings.Settings_DebugSubHeading)
                 .AddToggle(DebugLogToggle);
