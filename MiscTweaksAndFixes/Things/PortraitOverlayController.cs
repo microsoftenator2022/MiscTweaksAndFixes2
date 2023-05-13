@@ -18,6 +18,8 @@ using Owlcat.Runtime.UI.MVVM;
 
 using UnityEngine;
 
+using static UnityEngine.Rendering.DebugUI;
+
 namespace MiscTweaksAndFixes.Things
 {
     internal partial class PortraitOverlay : ViewBase<PartyCharacterVM>, IDisposable
@@ -45,9 +47,10 @@ namespace MiscTweaksAndFixes.Things
 
             private static void OnInitialize(ViewBase<PartyCharacterVM> __instance)
             {
+                //if (CreateNew(__instance)
                 if (CreateNew(__instance,
-                    AddedContent.RipAndTear.RipAndTear.PortraitOverlay.Face.Value,
-                    AddedContent.RipAndTear.RipAndTear.PortraitOverlay.Background.Value)
+                    foreground: AddedContent.RipAndTear.RipAndTear.PortraitOverlay.Face.Value,
+                    background: AddedContent.RipAndTear.RipAndTear.PortraitOverlay.Background.Value)
                     is not var (_, po)) return;
 
                 __instance.AddDisposable(po);
@@ -86,51 +89,30 @@ namespace MiscTweaksAndFixes.Things
                     return;
                 }
 
-                po.VM = __instance.ViewModel;
+                //po.ViewModel = __instance.ViewModel;
 
-                po.gameObject.SetActive(true);
+                po.Bind(__instance.ViewModel);
             }
         }
 
-        void IDisposable.Dispose()
+        public void Dispose()
         {
-            OnDisable();
-        }
-        
-        private PartyCharacterVM? vm;
-        private PartyCharacterVM? VM
-        {
-            get => vm;
-            set
-            {
-                if (value != null)
-                {
-                    MicroLogger.Debug(() => $"Binding to {value.CharacterName} ViewModel");
+            gameObject.SetActive(false);
 
-                    value.OnDispose += DestroyViewImplementation;
-                }
-                
-                OnDisable();
-
-                if (vm != null)
-                {
-                    vm.OnDispose -= DestroyViewImplementation;
-                    return;
-                }
-
-                vm = value;
-            }
+            SetBGSprite(null);
+            SetFGSprite(null);
         }
 
-        internal UnitEntityData? Unit => IsBinded ? VM!.UnitEntityData : null;
+        internal UnitEntityData? Unit => IsBinded ? ViewModel!.UnitEntityData : null;
 
-        public override void BindViewImplementation() { }
+        public override void BindViewImplementation()
+        {
+            gameObject.SetActive(true);
+        }
 
         public override void DestroyViewImplementation()
         {
-            if (vm == null) return;
-
-            vm = null;
+            Dispose();
         }
 
     }

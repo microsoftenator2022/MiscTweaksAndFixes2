@@ -17,39 +17,6 @@ using UnityEngine.UI;
 
 namespace MiscTweaksAndFixes.Things
 {
-    //namespace Unity
-    //{
-    //    internal static class UnityExtensions
-    //    {
-    //        internal static GameObject InitializeRectTransform(this GameObject obj, GameObject? parent = null)
-    //        {
-    //            if (obj.transform is not RectTransform rect)
-    //            {
-    //                MicroLogger.Error($"{obj} does not have RectTransform");
-
-    //                return obj;
-    //            }
-
-    //            rect.anchorMin = Vector2.zero;
-    //            rect.anchorMax = Vector2.one;
-    //            rect.offsetMin = Vector2.zero;
-    //            rect.offsetMax = Vector2.one;
-
-    //            rect.pivot = new Vector2(0.5f, 0);
-    //            rect.localRotation = Quaternion.identity;
-    //            rect.localScale = Vector2.one;
-
-    //            if (parent == null) return obj;
-
-    //            rect.SetParent(parent.transform, false);
-
-    //            rect.sizeDelta = Vector2.zero;
-
-    //            return obj;
-    //        }
-    //    }
-    //}
-
     internal partial class PortraitOverlay
     {
         private static class Prototypes
@@ -60,9 +27,7 @@ namespace MiscTweaksAndFixes.Things
                 get
                 {
                     if (background == null)
-                        background = new(
-                            "PortraitOverlayBackground",
-                            new Type[] { typeof(RectTransform), typeof(Image) });
+                        background = new("PortraitOverlayBackground", typeof(RectTransform), typeof(Image));
 
                     return background;
                 }
@@ -74,9 +39,7 @@ namespace MiscTweaksAndFixes.Things
                 get
                 {
                     if (foreground == null)
-                        foreground = new(
-                            "PortraitOverlayForeground",
-                            new Type[] { typeof(RectTransform), typeof(Image) });
+                        foreground = new("PortraitOverlayForeground", typeof(RectTransform), typeof(Image));
 
                     return foreground;
                 }
@@ -91,18 +54,21 @@ namespace MiscTweaksAndFixes.Things
             get
             {
                 if (prototype == null)
-                    prototype = new("PortraitOverlayController", typeof(PortraitOverlay), typeof(RectTransform));
+                    prototype = new("PortraitOverlay", typeof(PortraitOverlay), typeof(RectTransform));
 
                 return prototype;
             }
         }
 
-        public static (GameObject, PortraitOverlay)? CreateNew(ViewBase<PartyCharacterVM> view, Sprite? foreground = null, Sprite? background = null)
+        public static (GameObject, PortraitOverlay)? CreateNew(ViewBase<PartyCharacterVM> view,
+            Sprite? foreground = null, Sprite? background = null)
         {
-            UnitPortraitPartView portraitView;
+            var gameObject = Instantiate(Prototype);
 
             try
             {
+                UnitPortraitPartView portraitView;
+
                 if (view is PartyCharacterPCView pcView)
                 {
                     portraitView = pcView.m_PortraitView;
@@ -118,17 +84,7 @@ namespace MiscTweaksAndFixes.Things
                         $"{nameof(PartyCharacterPCView)} nor {nameof(PartyCharacterConsoleView)}",
                         nameof(view));
                 }
-            }
-            catch (ArgumentException ae)
-            {
-                MicroLogger.Error("Invalid view", ae);
-                return null;
-            }
-
-            var gameObject = Instantiate(Prototype);
             
-            try
-            {
                 gameObject.transform.SetParent(portraitView.transform, false);
 
                 var overlay = gameObject.GetComponent<PortraitOverlay>();
@@ -160,7 +116,7 @@ namespace MiscTweaksAndFixes.Things
                 }
 
                 overlay.Background = bg;
-                overlay.Background.transform.SetSiblingIndex(lifePortraitTransform.GetSiblingIndex() + 1);
+                //overlay.Background.transform.SetSiblingIndex(lifePortraitTransform.GetSiblingIndex() + 1);
 
                 if (overlay.CreateForegroundOverlay(gameObject) is not GameObject fg)
                 {
@@ -168,7 +124,10 @@ namespace MiscTweaksAndFixes.Things
                 }
                 
                 overlay.Foreground = fg;
-                overlay.Foreground.transform.SetSiblingIndex(lifePortraitTransform.GetSiblingIndex() + 1);
+                //overlay.Foreground.transform.SetSiblingIndex(lifePortraitTransform.GetSiblingIndex() + 1);
+
+                overlay.Background.transform.SetAsFirstSibling();
+                overlay.Foreground.transform.SetAsLastSibling();
 
                 //view.AddDisposable(overlay);
 
@@ -200,8 +159,13 @@ namespace MiscTweaksAndFixes.Things
         {
             MicroLogger.Debug(() => $"Enabling portrait overlay");
 
-            if (Background?.GetComponent<Image>()?.sprite != null) Background.SetActive(true);
-            if (Foreground?.GetComponent<Image>()?.sprite != null) Foreground.SetActive(true);
+            if (Background != null &&
+                Background.GetComponent<Image>().sprite != null)
+                Background.SetActive(true);
+
+            if (Foreground != null &&
+                Foreground.GetComponent<Image>().sprite != null)
+                Foreground.SetActive(true);
         }
 
         void OnDisable()
@@ -212,16 +176,34 @@ namespace MiscTweaksAndFixes.Things
             if (Foreground != null) Foreground.SetActive(false);
         }
 
+        private static void InitializeOverlayLayer(GameObject obj, GameObject parent)
+        {
+            if (obj.transform is not RectTransform rt) return;
+
+            rt.SetParent(parent.transform, false);
+
+            if (rt.parent is RectTransform parentTransform)
+            {
+                rt.anchorMin = parentTransform.anchorMin;
+                rt.anchorMax = parentTransform.anchorMax;
+
+                rt.offsetMin = parentTransform.offsetMin;
+                rt.offsetMax = parentTransform.offsetMax;
+
+                rt.localScale = parentTransform.localScale;
+            }
+
+            rt.localRotation = Quaternion.identity;
+            rt.sizeDelta = Vector2.zero;
+            rt.pivot = new Vector2(0.5f, 0);
+        }
+
         public GameObject? Background { get; private set; }
         public void SetBGSprite(Sprite? sprite)
         {
             if (Background == null) return;
 
-            if (sprite == null)
-            {
-                Background.SetActive(false);
-                return;
-            }
+            if (sprite == null) Background.SetActive(false);
 
             var image = Background.GetComponent<Image>();
             var oldSprite = image.sprite;
@@ -229,7 +211,6 @@ namespace MiscTweaksAndFixes.Things
 
             if (oldSprite != null) Destroy(oldSprite);
         }
-
         private GameObject? CreateBackgroundOverlay(GameObject parent)
         {
             var bgOverlay = Instantiate(Prototypes.Background);
@@ -243,8 +224,6 @@ namespace MiscTweaksAndFixes.Things
                 Destroy(bgOverlay);
                 return null;
             }
-
-            //bgOverlay.InitializeRectTransform(parent);
 
             //transform.SetParent(portraitView.transform);
 
@@ -266,22 +245,7 @@ namespace MiscTweaksAndFixes.Things
 
             //Background = bgOverlay;
 
-            bgTransform.SetParent(parent.transform, false);
-
-            if (bgTransform.parent is RectTransform parentTransform)
-            {
-                bgTransform.anchorMin = parentTransform.anchorMin;
-                bgTransform.anchorMax = parentTransform.anchorMax;
-
-                bgTransform.offsetMin = parentTransform.offsetMin;
-                bgTransform.offsetMax = parentTransform.offsetMax;
-
-                bgTransform.localScale = parentTransform.localScale;
-            }
-
-            bgTransform.localRotation = Quaternion.identity;
-            bgTransform.sizeDelta = Vector2.zero;
-            bgTransform.pivot = new Vector2(0.5f, 0);
+            InitializeOverlayLayer(bgOverlay, parent);
 
             return bgOverlay;
         }
@@ -291,11 +255,7 @@ namespace MiscTweaksAndFixes.Things
         {
             if (Foreground == null) return;
 
-            if (sprite == null)
-            {
-                Foreground.SetActive(false);
-                return;
-            }
+            if (sprite == null) Foreground.SetActive(false);
 
             var image = Foreground.GetComponent<Image>();
             var oldSprite = image.sprite;
@@ -319,28 +279,28 @@ namespace MiscTweaksAndFixes.Things
                 return null;
             }
 
-            fgTransform.SetParent(parent.transform, false);
+            //fgTransform.SetParent(parent.transform, false);
 
-            //fgOverlay.InitializeRectTransform(parent);
+            //if (fgTransform.parent is RectTransform parentTransform)
+            //{
+            //    fgTransform.anchorMin = parentTransform.anchorMin;
+            //    fgTransform.anchorMax = parentTransform.anchorMax;
 
-            if (fgTransform.parent is RectTransform parentTransform)
-            {
-                fgTransform.anchorMin = parentTransform.anchorMin;
-                fgTransform.anchorMax = parentTransform.anchorMax;
+            //    fgTransform.offsetMin = parentTransform.offsetMin;
+            //    fgTransform.offsetMax = parentTransform.offsetMax;
 
-                fgTransform.offsetMin = parentTransform.offsetMin;
-                fgTransform.offsetMax = parentTransform.offsetMax;
+            //    fgTransform.localScale = parentTransform.localScale;
+            //}
 
-                fgTransform.localScale = parentTransform.localScale;
-            }
-
-            fgTransform.localRotation = Quaternion.identity;
-            fgTransform.sizeDelta = Vector2.zero;
-            fgTransform.pivot = new Vector2(0.5f, 0);
+            //fgTransform.localRotation = Quaternion.identity;
+            //fgTransform.sizeDelta = Vector2.zero;
+            //fgTransform.pivot = new Vector2(0.5f, 0);
 
             //// Aspect ratio correction
             //var yScale = transform.localScale.y;
             //transform.localScale = new Vector3((float)(yScale / 1.2), yScale);
+
+            InitializeOverlayLayer(fgOverlay, parent);
 
             return fgOverlay;
         }
