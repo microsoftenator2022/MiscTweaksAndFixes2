@@ -46,8 +46,6 @@ namespace MiscTweaksAndFixes.Things
             }
         }
 
-        public PortraitOverlay() : base() { }
-
         private static GameObject? prototype;
         private static GameObject Prototype
         {

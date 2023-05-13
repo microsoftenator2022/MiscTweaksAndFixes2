@@ -18,8 +18,6 @@ using Owlcat.Runtime.UI.MVVM;
 
 using UnityEngine;
 
-using static UnityEngine.Rendering.DebugUI;
-
 namespace MiscTweaksAndFixes.Things
 {
     internal partial class PortraitOverlay : ViewBase<PartyCharacterVM>, IDisposable
@@ -78,7 +76,11 @@ namespace MiscTweaksAndFixes.Things
             private static void OnBindViewImplementation<TBuffView>(PartyCharacterView<TBuffView> __instance)
                 where TBuffView : ViewBase<UnitBuffPartVM>
             {
-                MicroLogger.Debug(() => $"Looking for overlay for {__instance.ViewModel?.CharacterName.Value ?? "<null>"}");
+                if (__instance.ViewModel == default) return;
+
+                var charaName = __instance.ViewModel.CharacterName.Value ?? "<null>";
+
+                MicroLogger.Debug(() => $"Looking for overlay for {charaName}");
 
                 var po = __instance.GetComponentInChildren<PortraitOverlay>(true);
 
@@ -89,11 +91,12 @@ namespace MiscTweaksAndFixes.Things
                     return;
                 }
 
-                //po.ViewModel = __instance.ViewModel;
-
+                MicroLogger.Debug(() => $"Binding to {charaName} ViewModel");
                 po.Bind(__instance.ViewModel);
             }
         }
+
+        public PortraitOverlay() : base() { }
 
         public void Dispose()
         {
