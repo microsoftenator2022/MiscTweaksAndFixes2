@@ -114,7 +114,6 @@ namespace MiscTweaksAndFixes.Things
                 }
 
                 overlay.Background = bg;
-                //overlay.Background.transform.SetSiblingIndex(lifePortraitTransform.GetSiblingIndex() + 1);
 
                 if (overlay.CreateForegroundOverlay(gameObject) is not GameObject fg)
                 {
@@ -122,12 +121,9 @@ namespace MiscTweaksAndFixes.Things
                 }
                 
                 overlay.Foreground = fg;
-                //overlay.Foreground.transform.SetSiblingIndex(lifePortraitTransform.GetSiblingIndex() + 1);
 
                 overlay.Background.transform.SetAsFirstSibling();
                 overlay.Foreground.transform.SetAsLastSibling();
-
-                //view.AddDisposable(overlay);
 
                 overlay.SetBGSprite(background);
                 overlay.SetFGSprite(foreground);
@@ -157,21 +153,21 @@ namespace MiscTweaksAndFixes.Things
         {
             MicroLogger.Debug(() => $"Enabling portrait overlay");
 
-            if (Background != null &&
-                Background.GetComponent<Image>().sprite != null)
-                Background.SetActive(true);
+            //if (Background != null &&
+            //    Background.GetComponent<Image>().sprite != null)
+            //    Background.SetActive(true);
 
-            if (Foreground != null &&
-                Foreground.GetComponent<Image>().sprite != null)
-                Foreground.SetActive(true);
+            //if (Foreground != null &&
+            //    Foreground.GetComponent<Image>().sprite != null)
+            //    Foreground.SetActive(true);
         }
 
         void OnDisable()
         {
             MicroLogger.Debug(() => $"Disabling portrait overlay");
             
-            if (Background != null) Background.SetActive(false);
-            if (Foreground != null) Foreground.SetActive(false);
+            //if (Background != null) Background.SetActive(false);
+            //if (Foreground != null) Foreground.SetActive(false);
         }
 
         private static void InitializeOverlayLayer(GameObject obj, GameObject parent)
@@ -213,35 +209,11 @@ namespace MiscTweaksAndFixes.Things
         {
             var bgOverlay = Instantiate(Prototypes.Background);
 
-            //var image = bgOverlay.GetComponent<Image>();
-
-            //if (bgSprite != null) image.sprite = bgSprite;
-
             if (bgOverlay.transform is not RectTransform bgTransform)
             {
                 Destroy(bgOverlay);
                 return null;
             }
-
-            //transform.SetParent(portraitView.transform);
-
-            //if (transform.parent.Find("LifePortrait") is RectTransform lifePortraitTransform)
-            //{
-            //    transform.anchorMin = lifePortraitTransform.anchorMin;
-            //    transform.anchorMax = lifePortraitTransform.anchorMax;
-
-            //    transform.offsetMin = lifePortraitTransform.offsetMin;
-            //    transform.offsetMax = lifePortraitTransform.offsetMax;
-
-            //    transform.localScale = lifePortraitTransform.localScale;
-
-            //    transform.SetSiblingIndex(lifePortraitTransform.GetSiblingIndex() + 1);
-            //}
-
-            //transform.localRotation = Quaternion.identity;
-            //transform.sizeDelta = Vector2.zero;
-
-            //Background = bgOverlay;
 
             InitializeOverlayLayer(bgOverlay, parent);
 
@@ -265,101 +237,15 @@ namespace MiscTweaksAndFixes.Things
         {
             var fgOverlay = Instantiate(Prototypes.Foreground);
 
-            //var image = fgOverlay.GetComponent<Image>();
-
-            //if (fgSprite != null) image.sprite = fgSprite;
-
-            //image.preserveAspect = false;
-
             if (fgOverlay.transform is not RectTransform fgTransform)
             {
                 Destroy(fgOverlay);
                 return null;
             }
 
-            //fgTransform.SetParent(parent.transform, false);
-
-            //if (fgTransform.parent is RectTransform parentTransform)
-            //{
-            //    fgTransform.anchorMin = parentTransform.anchorMin;
-            //    fgTransform.anchorMax = parentTransform.anchorMax;
-
-            //    fgTransform.offsetMin = parentTransform.offsetMin;
-            //    fgTransform.offsetMax = parentTransform.offsetMax;
-
-            //    fgTransform.localScale = parentTransform.localScale;
-            //}
-
-            //fgTransform.localRotation = Quaternion.identity;
-            //fgTransform.sizeDelta = Vector2.zero;
-            //fgTransform.pivot = new Vector2(0.5f, 0);
-
-            //// Aspect ratio correction
-            //var yScale = transform.localScale.y;
-            //transform.localScale = new Vector3((float)(yScale / 1.2), yScale);
-
             InitializeOverlayLayer(fgOverlay, parent);
 
             return fgOverlay;
         }
-
-        //private bool SetupPortraitOverlay(ViewBase<PartyCharacterVM>? view = null, Sprite? background = null, Sprite? foreground = null)
-        //{
-        //    if (view == null) view = this.GetComponentInParent<ViewBase<PartyCharacterVM>>();
-
-        //    if (view.GetComponentInChildren<PortraitOverlay>(true) != null)
-        //    {
-        //        SetBGSprite(background);
-        //        SetFGSprite(foreground);
-        //        return true;
-        //    }
-
-        //    try
-        //    {
-        //        UnitPortraitPartView portrait;
-                
-        //        if (view is PartyCharacterPCView pcView)
-        //        {
-        //            portrait = pcView.m_PortraitView;
-        //        }
-        //        else if (view is PartyCardCharacterConsoleView consoleView)
-        //        {
-        //            portrait = consoleView.m_PortraitView;
-        //        }
-        //        else
-        //        {
-        //            throw new ArgumentException(
-        //                $"{nameof(ViewBase<PartyCharacterVM>)} parameter is neither " +
-        //                $"{nameof(PartyCharacterPCView)} nor {nameof(PartyCharacterConsoleView)}",
-        //                nameof(view));
-        //        }
-
-        //        view.AddDisposable(this);
-        //        this.transform.parent = view.transform;
-
-        //        var sprite = foreground;
-        //        var bgSprite = background;
-
-        //        if (CreateBackgroundOverlay(portrait, bgSprite) is GameObject bg)
-        //        {
-        //            if (CreateForegroundOverlay(bg, sprite) is GameObject fg)
-        //            {
-        //                Background = bg;
-        //                Foreground = fg;
-
-        //                return true;
-        //            }
-                    
-        //            Destroy(bg);
-        //        }
-                
-        //        return false;
-        //    }
-        //    catch (ArgumentException ae)
-        //    {
-        //        MicroLogger.Error("Invalid view", ae);
-        //        return false;
-        //    }
-        //}
     }
 }

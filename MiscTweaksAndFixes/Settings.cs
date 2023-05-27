@@ -20,6 +20,7 @@ using MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking;
 using UnityModManagerNet;
 //using MiscTweaksAndFixes.AddedContent.RipAndTear;
 using MicroWrath.Util;
+using System.Reflection;
 
 namespace MiscTweaksAndFixes
 {
@@ -247,7 +248,7 @@ namespace MiscTweaksAndFixes
             Observable.FromEvent(action => SettingsLoadedEvent += action, action => SettingsLoadedEvent -= action);
 
         [Init]
-        internal static void Init() => 
+        internal static void Init() =>
             Triggers.BlueprintsCache_Init_Early.Take(1).Subscribe(_ => SettingsInit());
     }
 }
