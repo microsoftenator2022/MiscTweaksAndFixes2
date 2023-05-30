@@ -14,9 +14,13 @@ using Kingmaker.PubSubSystem;
 using Kingmaker.UI.MVVM._ConsoleView.Party;
 using Kingmaker.UI.MVVM._PCView.Party;
 using Kingmaker.UI.MVVM._VM.Party;
+using Kingmaker.UnitLogic;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
 
 using MicroWrath;
+using MicroWrath.Util.Linq;
+
+using Newtonsoft.Json;
 
 using Owlcat.Runtime.UI.MVVM;
 
@@ -104,24 +108,52 @@ namespace MiscTweaksAndFixes.Things
 
         public PortraitOverlay() : base() { }
 
-        private PortraitOverlayComponent? OverlayComponent;
+        private PortraitOverlayComponentData? OverlayComponentData;
 
         private IDisposable? BGSpriteChanged;
         private IDisposable? FGSpriteChanged;
 
         public void HandleFactCollectionUpdated(EntityFactsProcessor collection)
         {
-            if (Unit is null) Dispose();
-
-            if (collection.Manager.Owner != Unit ||
-                collection is not Kingmaker.UnitLogic.Buffs.BuffCollection buffs)
+            if (Unit is null)
+            {
+                Dispose();
                 return;
+            }
+
+            if (collection.Manager.Owner != Unit) return;
+
+            MicroLogger.Debug(() => $"{nameof(PortraitOverlay)}.{nameof(HandleFactCollectionUpdated)}");
+            MicroLogger.Debug(() => $"collection type: {collection.GetType()}");
+
+            if (collection is not Kingmaker.UnitLogic.Buffs.BuffCollection buffs)
+                return;
+
+            MicroLogger.Debug(() =>
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine("Buff components:");
+
+                foreach (var (i, b) in buffs.Enumerable.Indexed())
+                {
+                    sb.AppendLine($"Buff {i}: {b}");
+
+                    foreach (var c in b.Components)
+                    {
+                        sb.AppendLine($"  {c.SourceBlueprintComponent.GetType()}");
+                        sb.AppendLine($"  Is {nameof(IPortraitOverlayComponent)}? {c.SourceBlueprintComponent is IPortraitOverlayComponent}");
+                    }
+                }
+
+                return sb.ToString();
+            });
 
             if (buffs.Enumerable
                 .SelectMany(b => b.Components)
-                .OfType<PortraitOverlayComponent>()
+                .Where(c => c.SourceBlueprintComponent is IPortraitOverlayComponent)
+                .Select(c => c.GetData<PortraitOverlayComponentData>())
                 .FirstOrDefault()
-                is not { } overlayComponent)
+                is not { } overlayComponentData)
             {
                 if (!gameObject.activeSelf) return;
 
@@ -129,28 +161,39 @@ namespace MiscTweaksAndFixes.Things
                 return;
             }
 
-            if (OverlayComponent is not null && overlayComponent == OverlayComponent) return;
+            if (OverlayComponentData != null && overlayComponentData == OverlayComponentData) return;
 
             Dispose();
-            EnableOverlay(overlayComponent);
+
+            EnableOverlay(overlayComponentData);
         }
 
-        public void EnableOverlay(PortraitOverlayComponent? overlayComponent = null)
+        public void EnableOverlay(PortraitOverlayComponentData overlayComponentData)
         {
-            overlayComponent ??= OverlayComponent;
+            //if (overlayComponentData is null)
+            //{
+            //    MicroLogger.Error("Tried to enable null overlay");
 
-            if (overlayComponent is null)
-            {
-                MicroLogger.Error("Tried to enable null overlay");
+            //    Dispose();
+            //    return;
+            //}
 
-                Dispose();
-                return;
-            }
+            OverlayComponentData = overlayComponentData;
 
-            BGSpriteChanged = overlayComponent.BackgroundSprite.Subscribe(SetBGSprite);
+            SetBGSprite(overlayComponentData.BackgroundSprite.Value);
+            BGSpriteChanged = overlayComponentData.BackgroundSprite.Subscribe(SetBGSprite);
             AddDisposable(BGSpriteChanged);
 
-            FGSpriteChanged = overlayComponent.ForegroundSprite.Subscribe(SetFGSprite);
+            void setFG((Sprite, float)? value)
+            {
+                if (value is not var (fgSprite, aspectRatio))
+                    SetFGSprite(null);
+                else SetFGSprite(fgSprite, aspectRatio);
+            }
+
+            setFG(overlayComponentData.ForegroundSprite.Value);
+
+            FGSpriteChanged = overlayComponentData.ForegroundSprite.Subscribe(setFG);
             AddDisposable(FGSpriteChanged);
 
             gameObject.SetActive(true);
@@ -167,8 +210,9 @@ namespace MiscTweaksAndFixes.Things
             RemoveDisposable(FGSpriteChanged);
             FGSpriteChanged?.Dispose();
             SetFGSprite(null);
-
-            OverlayComponent = null;
+            
+            OverlayComponentData?.Dispose();
+            OverlayComponentData = null;
         }
 
         internal UnitEntityData? Unit => IsBinded ? ViewModel!.UnitEntityData : null;
@@ -188,11 +232,33 @@ namespace MiscTweaksAndFixes.Things
         }
     }
 
-    [AllowedOn(typeof(BlueprintFeature))]
-    [AllowedOn(typeof(BlueprintBuff))]
-    public class PortraitOverlayComponent : BlueprintComponent
+    internal interface IPortraitOverlayComponent { }
+
+    public class PortraitOverlayComponentData : IDisposable
     {
-        public ReactiveProperty<Sprite?> ForegroundSprite = new(null);
-        public ReactiveProperty<Sprite?> BackgroundSprite = new(null);
+        [JsonIgnore]
+        private ReactiveProperty<Sprite?>? backgroundSprite;
+
+        [JsonIgnore]
+        public ReactiveProperty<Sprite?> BackgroundSprite
+        {
+            get => backgroundSprite ??= new(null);
+            set => backgroundSprite = value;
+        }
+     
+        [JsonIgnore]
+        private ReactiveProperty<(Sprite, float)?>? foregroundSprite;
+
+        [JsonIgnore]
+        public ReactiveProperty<(Sprite, float)?> ForegroundSprite
+        {
+            get => foregroundSprite ??= new(null);
+            set => foregroundSprite = value;
+        }
+
+        public virtual void Dispose() { }
     }
+
+    public abstract class PortraitOverlayComponent<TData> : UnitFactComponentDelegate<TData>, IPortraitOverlayComponent
+        where TData : PortraitOverlayComponentData, new() { }
 }

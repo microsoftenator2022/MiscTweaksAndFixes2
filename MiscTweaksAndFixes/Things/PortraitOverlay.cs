@@ -197,13 +197,13 @@ namespace MiscTweaksAndFixes.Things
         {
             if (Background == null) return;
 
-            if (sprite == null) Background.SetActive(false);
+            Background.SetActive(sprite != null);
 
             var image = Background.GetComponent<Image>();
             var oldSprite = image.sprite;
             image.sprite = sprite;
 
-            if (oldSprite != null) Destroy(oldSprite);
+            //if (oldSprite != null) Destroy(oldSprite);
         }
         private GameObject? CreateBackgroundOverlay(GameObject parent)
         {
@@ -221,17 +221,24 @@ namespace MiscTweaksAndFixes.Things
         }
 
         public GameObject? Foreground { get; private set; }
-        public void SetFGSprite(Sprite? sprite)
+        public void SetFGSprite(Sprite? sprite, float aspectRatio = 0)
         {
             if (Foreground == null) return;
 
-            if (sprite == null) Foreground.SetActive(false);
+            Foreground.SetActive(sprite != null);
 
             var image = Foreground.GetComponent<Image>();
             var oldSprite = image.sprite;
             image.sprite = sprite;
 
-            if (oldSprite != null) Destroy(oldSprite);
+            if (aspectRatio > 0)
+            {
+                // Aspect ratio correction
+                var yScale = Foreground.transform.localScale.y;
+                Foreground.transform.localScale = new Vector3((float)(yScale / aspectRatio), yScale);
+            }
+
+            //if (oldSprite != null) Destroy(oldSprite);
         }
         private GameObject? CreateForegroundOverlay(GameObject parent)
         {

@@ -13,6 +13,10 @@ using Kingmaker;
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
 using Kingmaker.Blueprints.Items.Ecnchantments;
+using Kingmaker.EntitySystem.Entities;
+using Kingmaker.PubSubSystem;
+using Kingmaker.RuleSystem.Rules.Damage;
+using Kingmaker.UnitLogic;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
 using Kingmaker.UnitLogic.FactLogic;
 
@@ -24,22 +28,24 @@ using MicroWrath.Extensions.Components;
 using MicroWrath.Util;
 using MicroWrath.Util.Linq;
 
+using MiscTweaksAndFixes.Things;
+
+using Newtonsoft.Json;
+
+using Owlcat.Runtime.UniRx;
+
 using UnityEngine;
 
 using Wat;
 
 namespace MiscTweaksAndFixes.AddedContent.RipAndTear
 {
-    internal static partial class RipAndTear
+    [AllowedOn(typeof(BlueprintBuff))]
+    public class DoomGuyFaceOverlay : PortraitOverlayComponent<DoomGuyFaceOverlay.ComponentData>, IDamageHandler, IUnitLifeStateChanged
+    //, IFactCollectionUpdatedHandler
     {
-        private static bool enabled = true;
-        internal static bool Enabled
-        {
-            get => enabled; set => enabled = value;
-        }
-
         #region DGFace
-        internal enum DGFace
+        public enum DGFace
         {
             STFDEAD00,
             STFEVL0,
@@ -85,7 +91,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
             STFTR40
         }
 
-        private readonly record struct FaceSet(DGFace EVL, DGFace KILL, DGFace OUCH, DGFace ST0, DGFace ST1, DGFace ST2,
+        public readonly record struct FaceSet(DGFace EVL, DGFace KILL, DGFace OUCH, DGFace ST0, DGFace ST1, DGFace ST2,
             DGFace FTL, DGFace FTR)
         {
             public FaceSet() : this(DGFace.STFEVL0, DGFace.STFKILL0, DGFace.STFOUCH0, DGFace.STFST00, DGFace.STFST01,
@@ -93,7 +99,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
             { }
         }
 
-        private static FaceSet FacesForHP(int hpPercent)
+        public static FaceSet FacesForHP(int hpPercent)
         {
             return hpPercent switch
             {
@@ -145,6 +151,218 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
             };
         }
         #endregion
+
+        public class ComponentData : PortraitOverlayComponentData, IDisposable
+        {
+            //public ComponentData() { }
+
+
+            [JsonIgnore]
+            private DGFace currentFace;
+
+            [JsonIgnore]
+            public DGFace CurrentFace
+            {
+                get => currentFace;
+
+                set
+                {
+                    currentFace = value;
+
+                    var faceName = Enum.GetName(typeof(DGFace), CurrentFace);
+
+                    MicroLogger.Debug(() => $"Setting face to {faceName}");
+
+                    ForegroundSprite.Value = (RipAndTear.GetSprite(faceName), (float)1.2);
+                }
+            }
+
+            public void Init()
+            {
+                MicroLogger.Debug(() => $"{nameof(DoomGuyFaceOverlay)}.{nameof(ComponentData)}.{nameof(Init)}");
+
+                BackgroundSprite.Value = RipAndTear.GetSprite("STFB1");
+            }
+
+            [JsonIgnore]
+            public FaceSet CurrentFaceSet = FacesForHP(100);
+
+            public void RefreshFace()
+            {
+                MicroLogger.Debug(() => $"{nameof(DoomGuyFaceOverlay)}.{nameof(RefreshFace)}");
+
+                if (CurrentFace == CurrentFaceSet.ST1)
+                {
+                    if (UnityEngine.Random.Range(0, 2) > 0)
+                        CurrentFace = CurrentFaceSet.ST2;
+                    else
+                        CurrentFace = CurrentFaceSet.ST0;
+                }
+                else
+                {
+                    CurrentFace = CurrentFaceSet.ST1;
+                }
+            }
+
+            [JsonIgnore]
+            private IDisposable? UpdateTimer;
+
+            // Doom's ticrate (fps) is 35/s
+            internal void ResetTimer(int tics)
+            {
+                UpdateTimer?.Dispose();
+
+                var ts = TimeSpan.FromMilliseconds((double)tics * 1000 / 35);
+
+                UpdateTimer = DelayedInvoker.InvokeInTime(() =>
+                {
+                    UpdateTimer?.Dispose();
+                    UpdateTimer = null;
+
+                    RefreshFace();
+                    ResetTimer();
+                },
+                (float)ts.TotalSeconds, true);
+            }
+
+            internal void ResetTimer()
+            {
+                var ticsInterval = 70 + UnityEngine.Random.Range(-20, 20);
+                ResetTimer(ticsInterval);
+            }
+            internal void ResetTimerShort()
+            {
+                var ticsInterval = 35 + UnityEngine.Random.Range(-10, 10);
+                ResetTimer(ticsInterval);
+            }
+
+            public override void Dispose()
+            {
+                UpdateTimer?.Dispose();
+            }
+
+        }
+
+        public override void OnDeactivate()
+        {
+            MicroLogger.Debug(() => $"{nameof(DoomGuyFaceOverlay)}.{nameof(OnDeactivate)}");
+
+            Data.Dispose();
+
+            base.OnDeactivate();
+        }
+
+        public override void OnFactAttached()
+        {
+            MicroLogger.Debug(() => $"{nameof(DoomGuyFaceOverlay)}.{nameof(OnFactAttached)}");
+
+            Data.Init();
+
+            Data.RefreshFace();
+            Data.ResetTimer();
+
+            base.OnFactAttached();
+        }
+
+        //[JsonIgnore]
+        //private DGFace currentFace;
+
+        internal DGFace CurrentFace
+        {
+            get
+            {
+                if (Owner is null)
+                {
+                    MicroLogger.Error("Null owner for overlay");
+
+                    return Data.CurrentFace;
+                }
+
+                if (Owner.State.IsDead) return DGFace.STFDEAD00;
+
+                //if (IsGodMode) return DGFace.STFGOD0;
+
+                return Data.CurrentFace;
+            }
+        }
+
+        internal void UpdateFaceSet()
+        {
+            if (Owner is null)
+            {
+                MicroLogger.Error("Null owner for overlay");
+                return;
+            }
+
+            var hpPercent = ((Owner.HPLeft + Owner.TemporaryHP) * 100) / Owner.MaxHP;
+
+            Data.CurrentFaceSet = FacesForHP(hpPercent);
+        }
+
+        void IDamageHandler.HandleDamageDealt(RuleDealDamage dealDamage)
+        {
+            if (Owner is null)
+            {
+                return;
+            }
+
+            if (dealDamage.Target != this.Owner) return;
+            MicroLogger.Debug(() => $"{nameof(DoomGuyFaceOverlay)} {nameof(IDamageHandler.HandleDamageDealt)}");
+
+            var amount = dealDamage.Result;
+            var sourceUnit = dealDamage.Initiator;
+
+            MicroLogger.Debug(() => $"Damage amount: {amount}. HP: {Owner.HPLeft + 1}/{Owner.MaxHP + Owner.TemporaryHP}");
+
+            if (amount < 1) return;
+
+            UpdateFaceSet();
+
+            if (amount >= Owner.MaxHP / 0.2)
+            {
+                Data.CurrentFace = Data.CurrentFaceSet.OUCH;
+            }
+            else
+            {
+                if (sourceUnit is not null)
+                {
+                    var camera = Game.GetCamera();
+
+                    var camWidth = camera.rect.width;
+
+                    var screenPosition = camera.WorldToViewportPoint(sourceUnit.Position);
+
+                    if (screenPosition.x < camWidth / 3)
+                        Data.CurrentFace = Data.CurrentFaceSet.FTL;
+
+                    else if (screenPosition.x > (camWidth * 2) / 3)
+                        Data.CurrentFace = Data.CurrentFaceSet.FTR;
+
+                    else Data.CurrentFace = Data.CurrentFaceSet.KILL;
+                }
+                else Data.CurrentFace = Data.CurrentFaceSet.KILL;
+            }
+
+            Data.ResetTimerShort();
+        }
+
+        void IUnitLifeStateChanged.HandleUnitLifeStateChanged(UnitEntityData unit, UnitLifeState _)
+        {
+            if (unit is null || unit != Owner) return;
+
+            MicroLogger.Debug(() => $"{nameof(DoomGuyFaceOverlay)} {nameof(IUnitLifeStateChanged.HandleUnitLifeStateChanged)}");
+
+            Data.RefreshFace();
+        }
+    }
+
+    internal static partial class RipAndTear
+    {
+        private static bool enabled;
+        internal static bool Enabled
+        {
+            get => enabled; set => enabled = value;
+        }
 
         //        public interface IPortraitOverlayController
         //        {
@@ -502,7 +720,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
             var buff = bic.NewBlueprint<BlueprintBuff>("03ABBCCA-C01C-4057-A183-9CB20B3D4C8C", "RipAndTearBuff")
                 .Map(buff =>
                 {
-                    //buff.AddComponent<PortraitOverlayComponent>();
+                    buff.AddComponent<DoomGuyFaceOverlay>();
 
                     buff.m_Flags = BlueprintBuff.Flags.HiddenInUi;
 
@@ -531,9 +749,12 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 {
                     var (enchant, feature) = ef;
 
-                    var component = enchant.AddAddUnitFeatureEquipment();
+                    if (enabled)
+                    {
+                        var component = enchant.AddAddUnitFeatureEquipment();
 
-                    component.m_Feature = feature.ToReference<BlueprintFeatureReference>();
+                        component.m_Feature = feature.ToReference<BlueprintFeatureReference>();
+                    }
 
                     return enchant;
                 });
@@ -543,8 +764,8 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 .Map(ie =>
                 {
                     var (item, enchant) = ie;
-
-                    //item.Enchantments.Add(enchant);
+                    
+                    if (enabled) item.Enchantments.Add(enchant);
                 })
                 .Register();
         }
