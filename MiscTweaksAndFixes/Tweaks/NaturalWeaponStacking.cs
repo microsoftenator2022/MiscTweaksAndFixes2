@@ -41,18 +41,50 @@ namespace MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking
 {
     internal static class NaturalWeaponStacking
     {
-        // Automatically identify natural weapons on equip
-        [HarmonyPatch(typeof(ItemEntity), nameof(ItemEntity.OnDidEquipped))]
-        internal class ItemEntity_OnDidEquipped_Patch
-        {
-            static void Prefix(UnitEntityData wielder, ItemEntity __instance)
-            {
-                if (!wielder.IsPlayerFaction) return;
+        // These should probably be in the "fixes" category
+        // TODO: Move these patches to their own file
+        //[HarmonyPatch(typeof(ItemEntity), nameof(ItemEntity.OnDidEquipped))]
+        //internal class ItemEntity_OnDidEquipped_Patch
+        //{
+        //    // Automatically identify natural weapons on equip
+        //    static void Prefix(UnitEntityData wielder, ItemEntity __instance)
+        //    {
+        //        if (!wielder.IsPlayerFaction) return;
 
-                if (__instance is ItemEntityWeapon weapon && weapon.Blueprint.IsNatural)
-                    weapon.Identify();
-            }
-        }
+        //        if (__instance is ItemEntityWeapon weapon && weapon.Blueprint.IsNatural)
+        //            weapon.Identify();
+        //    }
+
+        //    static void Postfix(UnitEntityData wielder, ItemEntity __instance)
+        //    {
+        //        if (!PatchConditions(wielder)) return;
+
+        //        if (__instance is not ItemEntityWeapon weapon) return;
+        //        var blueprint = weapon.Blueprint;
+        //        if (!blueprint.IsNatural || blueprint.IsUnarmed) return;
+        //        var ehws = wielder.Facts.List.SelectMany(f => f.Blueprint.Components.OfType<EmptyHandWeaponOverride>());
+        //        if (ehws.Where(ehw => ehw.Weapon == blueprint).Count() == 0) return;
+        //        ehws = ehws.Where(ehw => ehw.Weapon != blueprint && ehw.Weapon.Category == blueprint.Category);
+        //        if (!ehws.Any()) return;
+
+        //        MicroLogger.Debug(() => $"{nameof(ItemEntity_OnDidEquipped_Patch)}.{nameof(Postfix)}");
+        //        MicroLogger.Debug(() => $"{wielder}");
+
+        //        foreach (var ehw in ehws)
+        //        {
+        //            if (ehws.Any(c => c.Weapon.BaseDamage.IsBetterThan(ehw.Weapon.BaseDamage)))
+        //                continue;
+
+        //            MicroLogger.Debug(() => $"{ehw} ({ehw.Weapon.BaseDamage}) > {weapon} ({weapon.Blueprint.BaseDamage})? {ehw.Weapon.BaseDamage.IsBetterThan(weapon.Blueprint.BaseDamage)}");
+
+        //            if (ehw.Weapon.BaseDamage.IsBetterThan(weapon.Blueprint.BaseDamage))
+        //            {
+        //                ehw.SetWeapon();
+        //                return;
+        //            }
+        //        }
+        //    }
+        //}
 
         [HarmonyPatch(typeof(ItemEntityWeapon), nameof(ItemEntityWeapon.Size), MethodType.Getter)]
         internal class ItemEntityWeapon_get_Size_Patch
@@ -85,8 +117,8 @@ namespace MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking
                 var newSize = size + Math.Max(0, sizeIncrease);
 
                 MicroLogger.Debug(() => $"Size change = {sizeIncrease}: " +
-                    $"{WeaponDamageScaleTable.Scale(blueprint.BaseDamage, size, blueprint.Size)} ({size}) " +
-                    $"-> {WeaponDamageScaleTable.Scale(blueprint.BaseDamage, newSize, blueprint.Size)} ({newSize})");
+                    $"{WeaponDamageScaleTable.Scale(blueprint.BaseDamage, size, blueprint.Size)} ({size})" +
+                    $" -> {WeaponDamageScaleTable.Scale(blueprint.BaseDamage, newSize, blueprint.Size)} ({newSize})");
 
                 return newSize;
             }
@@ -112,9 +144,9 @@ namespace MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking
 
                 foreach (var weapon in GetAllNaturalWeapons(unit).Where(w => w.Category == blueprint.Category))
                 {
-                    foreach(var enchantBlueprint in weapon.Enchantments)
+                    foreach (var enchantBlueprint in weapon.Enchantments)
                     {
-                        if(__instance.Weapon.Enchantments.Any(e => e.Blueprint.AssetGuid == enchantBlueprint.AssetGuid)) continue;
+                        if (__instance.Weapon.Enchantments.Any(e => e.Blueprint.AssetGuid == enchantBlueprint.AssetGuid)) continue;
 
                         MicroLogger.Debug(() => $"Adding enchant {enchantBlueprint.Name} '{enchantBlueprint.AssetGuid}'" +
                             $" from weapon {weapon.Name}'{weapon.AssetGuid}'");
@@ -257,7 +289,7 @@ namespace MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking
                         foreach (var c in eho.Components.OfType<EmptyHandWeaponOverride>())
                             MicroLogger.Debug(() => 
                                 $"      {(c.Weapon.Category == weaponCategory ? "*" : " ")} " +
-                                $"{c.Weapon.Name} ({c.Weapon.Category}) - {c.Weapon.AssetGuid}");
+                                $"{c.Weapon.Damage} {c.Weapon.Name} ({c.Weapon.Category}) - {c.Weapon.AssetGuid}");
                     }
                 }
 
@@ -271,7 +303,7 @@ namespace MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking
                         {
                             MicroLogger.Debug(() => 
                                 $"      {(w.Category == weaponCategory ? "*" : " ")} " +
-                                $"{w.Name} ({w.Category}) - {w.AssetGuid}");
+                                $"{w.Damage} {w.Name} ({w.Category}) - {w.AssetGuid}");
                         }
 
                     }
@@ -286,7 +318,7 @@ namespace MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking
                         foreach (var c in al.Components.OfType<AddAdditionalLimb>())
                             MicroLogger.Debug(() => 
                                 $"      {(c.Weapon.Category == weaponCategory ? "*" : " ")} " +
-                                $"{c.Weapon.Name} ({c.Weapon.Category}) - {c.Weapon.AssetGuid}");
+                                $"{c.Weapon.Damage} {c.Weapon.Name} ({c.Weapon.Category}) - {c.Weapon.AssetGuid}");
                     }
                 }
             }
@@ -297,7 +329,7 @@ namespace MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking
                 additionalLimbs.SelectMany(AddAdditionalLimbs).Where(al => al.Weapon.Category == weaponCategory));
         }
 
-        public static bool Enabled { get; internal set; } = true;
+        public static bool Enabled { get; internal set; }
 
         private static void DebugWeaponInstance(ItemEntityWeapon weapon)
         {
@@ -320,7 +352,7 @@ namespace MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking
         {
             if(!Enabled) return false;
 
-            if (unit is null) return false;
+            if (unit is null || unit.Body is null) return false;
 
             if(!unit.IsPlayerFaction) return false;
             if(unit.IsPet) return false;
