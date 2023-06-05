@@ -29,6 +29,20 @@ The Book of Dreams item is supposed to upgrade at certain points in the story,
 but this has never reliably worked (at least in my experience). Enabling this forces the 
 upgrade script to run on every Etude update. Disabled by default.
 
+### Identify natural weapons
+
+In some cases, "enchanted" natural weapons will appear as Unidentified, requiring a Knowledge (Arcana) check
+to identify. This force identifies natural weapons on equip
+
+(This was already included in previous versions of the mod and enabled at all times,
+but has now been given its own setting)
+
+### Fix empty hand weapon equip
+
+When multiple features or buffs grant "empty hand replacement" weapons (eg. claws) the game is supposed to equip the "best" set
+but sometimes it just chooses the newest (which may be worse than the claws they're replacing).
+This adds an additional check after equip to try to ensure the "best" weapon was selected.
+
 ### Reformed Fiend DR/good
 
 Changes the damage reduction for the Reformed Fiend Bloodrage archetype from DR/evil to DR/good.
