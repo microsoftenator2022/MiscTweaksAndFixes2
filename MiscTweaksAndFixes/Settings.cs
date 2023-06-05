@@ -220,9 +220,9 @@ namespace MiscTweaksAndFixes
             "In some cases, enchanted natural weapons require a Knowledge (Arcana) check to identify." +
             " Instead, automatically identify natural weapons on equip.";
 
-        private static Toggle IdentifyNaturalWeapons =>
+        private static Toggle IdentifyNaturalWeaponsToggle =>
             CreateSettingToggle(
-                nameof(IdentifyNaturalWeapons),
+                nameof(IdentifyNaturalWeaponsToggle),
                 defaultValue: true,
                 description: LocalizedStrings.Settings_IdentifyNaturalWeaponsDescription,
                 longDescription: LocalizedStrings.Settings_IdentifyNaturalWeaponsLongDescription,
@@ -237,13 +237,25 @@ namespace MiscTweaksAndFixes
             " Force selection of the \"best\" empty hand replacement weapon.\n" +
             "May only be needed if using Natural Weapon Stacking.";
 
-        private static Toggle EquipBestEmptyHandWeapon =>
+        private static Toggle EquipBestEmptyHandWeaponToggle =>
             CreateSettingToggle(
-                nameof(EquipBestEmptyHandWeapon),
+                nameof(EquipBestEmptyHandWeaponToggle),
                 defaultValue: true,
                 description: LocalizedStrings.Settings_EquipBestEmptyHandWeaponDescription,
                 longDescription: LocalizedStrings.Settings_EquipBestEmptyHandWeaponLongDescription,
                 onChanged: value => NaturalWeapons.EquipBestEmptyHandWeapon = value);
+
+        [LocalizedString]
+        public const string ZippyMagicBlastsDescription = "Zippy Magic Blasts";
+        [LocalizedString]
+        public const string ZippyMagicBlastsLongDescription = "Makes Zippy Magic also apply to kineticists' (ranged) energy blasts";
+
+        private static Toggle ZippyMagicBlastsToggle =>
+            CreateSettingToggle(nameof(ZippyMagicBlastsToggle),
+                defaultValue: false,
+                description: LocalizedStrings.Settings_ZippyMagicBlastsDescription,
+                longDescription: LocalizedStrings.Settings_ZippyMagicBlastsLongDescription,
+                onChanged: value => ZippyMagicBlasts.Enabled = value);
 
         internal static void SettingsInit()
         {
@@ -253,8 +265,8 @@ namespace MiscTweaksAndFixes
                 .AddSubHeader(LocalizedStrings.Settings_FixesSubHeading)
                 .AddToggle(BookOfDreamsToggle)
                 .AddToggle(StrengthBlessingMajorFixToggle)
-                .AddToggle(IdentifyNaturalWeapons)
-                .AddToggle(EquipBestEmptyHandWeapon)
+                .AddToggle(IdentifyNaturalWeaponsToggle)
+                .AddToggle(EquipBestEmptyHandWeaponToggle)
                 
                 .AddSubHeader(LocalizedStrings.Settings_TweaksSubHeading)
                 .AddToggle(NaturalWeaponStackingToggle)
