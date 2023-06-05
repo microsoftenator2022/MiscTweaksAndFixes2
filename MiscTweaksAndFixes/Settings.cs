@@ -213,6 +213,38 @@ namespace MiscTweaksAndFixes
         [LocalizedString]
         public const string DebugSubHeading = "Debug options";
 
+        [LocalizedString]
+        public const string IdentifyNaturalWeaponsDescription = "Identify natural weapons";
+        [LocalizedString]
+        public const string IdentifyNaturalWeaponsLongDescription =
+            "In some cases, enchanted natural weapons require a Knowledge (Arcana) check to identify." +
+            " Instead, automatically identify natural weapons on equip.";
+
+        private static Toggle IdentifyNaturalWeapons =>
+            CreateSettingToggle(
+                nameof(IdentifyNaturalWeapons),
+                defaultValue: true,
+                description: LocalizedStrings.Settings_IdentifyNaturalWeaponsDescription,
+                longDescription: LocalizedStrings.Settings_IdentifyNaturalWeaponsLongDescription,
+                onChanged: value => NaturalWeapons.IdentifyNaturalWeapons = value);
+
+        [LocalizedString]
+        public const string EquipBestEmptyHandWeaponDescription = "Equip best empty hand weapon";
+        [LocalizedString]
+        public const string EquipBestEmptyHandWeaponLongDescription =
+            "When multiple features or buffs provide empty hand reqlacements (eg. claws)" +
+            " the game doesn't always select the best empty hand weapon, using the most recent instead." +
+            " Force selection of the \"best\" empty hand replacement weapon.\n" +
+            "May only be needed if using Natural Weapon Stacking.";
+
+        private static Toggle EquipBestEmptyHandWeapon =>
+            CreateSettingToggle(
+                nameof(EquipBestEmptyHandWeapon),
+                defaultValue: true,
+                description: LocalizedStrings.Settings_EquipBestEmptyHandWeaponDescription,
+                longDescription: LocalizedStrings.Settings_EquipBestEmptyHandWeaponLongDescription,
+                onChanged: value => NaturalWeapons.EquipBestEmptyHandWeapon = value);
+
         internal static void SettingsInit()
         {
             var settings = SettingsBuilder
@@ -221,6 +253,8 @@ namespace MiscTweaksAndFixes
                 .AddSubHeader(LocalizedStrings.Settings_FixesSubHeading)
                 .AddToggle(BookOfDreamsToggle)
                 .AddToggle(StrengthBlessingMajorFixToggle)
+                .AddToggle(IdentifyNaturalWeapons)
+                .AddToggle(EquipBestEmptyHandWeapon)
                 
                 .AddSubHeader(LocalizedStrings.Settings_TweaksSubHeading)
                 .AddToggle(NaturalWeaponStackingToggle)

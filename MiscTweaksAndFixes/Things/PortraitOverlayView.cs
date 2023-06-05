@@ -124,29 +124,29 @@ namespace MiscTweaksAndFixes.Things
             if (collection.Manager.Owner != Unit) return;
 
             MicroLogger.Debug(() => $"{nameof(PortraitOverlay)}.{nameof(HandleFactCollectionUpdated)}");
-            MicroLogger.Debug(() => $"collection type: {collection.GetType()}");
+            //MicroLogger.Debug(() => $"collection type: {collection.GetType()}");
 
             if (collection is not Kingmaker.UnitLogic.Buffs.BuffCollection buffs)
                 return;
 
-            MicroLogger.Debug(() =>
-            {
-                var sb = new StringBuilder();
-                sb.AppendLine("Buff components:");
+            //MicroLogger.Debug(() =>
+            //{
+            //    var sb = new StringBuilder();
+            //    sb.AppendLine("Buff components:");
 
-                foreach (var (i, b) in buffs.Enumerable.Indexed())
-                {
-                    sb.AppendLine($"Buff {i}: {b}");
+            //    foreach (var (i, b) in buffs.Enumerable.Indexed())
+            //    {
+            //        sb.AppendLine($"Buff {i}: {b}");
 
-                    foreach (var c in b.Components)
-                    {
-                        sb.AppendLine($"  {c.SourceBlueprintComponent.GetType()}");
-                        sb.AppendLine($"  Is {nameof(IPortraitOverlayComponent)}? {c.SourceBlueprintComponent is IPortraitOverlayComponent}");
-                    }
-                }
+            //        foreach (var c in b.Components)
+            //        {
+            //            sb.AppendLine($"  {c.SourceBlueprintComponent.GetType()}");
+            //            sb.AppendLine($"  Is {nameof(IPortraitOverlayComponent)}? {c.SourceBlueprintComponent is IPortraitOverlayComponent}");
+            //        }
+            //    }
 
-                return sb.ToString();
-            });
+            //    return sb.ToString();
+            //});
 
             if (buffs.Enumerable
                 .SelectMany(b => b.Components)
