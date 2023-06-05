@@ -248,7 +248,7 @@ namespace MiscTweaksAndFixes
         [LocalizedString]
         public const string ZippyMagicBlastsDescription = "Zippy Magic Blasts";
         [LocalizedString]
-        public const string ZippyMagicBlastsLongDescription = "Makes Zippy Magic also apply to kineticists' (ranged) energy blasts";
+        public const string ZippyMagicBlastsLongDescription = "Makes Zippy Magic also apply to kineticists' (ranged) energy blasts.\nRequires restart.";
 
         private static Toggle ZippyMagicBlastsToggle =>
             CreateSettingToggle(nameof(ZippyMagicBlastsToggle),
@@ -256,6 +256,22 @@ namespace MiscTweaksAndFixes
                 description: LocalizedStrings.Settings_ZippyMagicBlastsDescription,
                 longDescription: LocalizedStrings.Settings_ZippyMagicBlastsLongDescription,
                 onChanged: value => ZippyMagicBlasts.Enabled = value);
+
+        [LocalizedString]
+        public const string BasicBlastsDescription = "Extra basic blasts";
+        [LocalizedString]
+        public const string BasicBlastsLongDescription =
+            "Whenever a kineticist selects an element focus that has more than one blast type (eg. water or air)," +
+            " they also gain a weak version of the other basic blast. This blast does not advance in die count and cannot have form" +
+            " infusions applied to it. It also cannot qualify as a prerequisite for feats, infusions, wild talents, etc.\nRequires restart.";
+
+        private static Toggle BasicBlastsToggle =>
+            CreateSettingToggle(
+                nameof(BasicBlastsToggle),
+                defaultValue: false,
+                description: LocalizedStrings.Settings_BasicBlastsDescription,
+                longDescription: LocalizedStrings.Settings_BasicBlastsLongDescription,
+                onChanged: value => BasicBlasts.Enabled = value);
 
         internal static void SettingsInit()
         {
@@ -271,6 +287,8 @@ namespace MiscTweaksAndFixes
                 .AddSubHeader(LocalizedStrings.Settings_TweaksSubHeading)
                 .AddToggle(NaturalWeaponStackingToggle)
                 .AddToggle(ReformedFiendDRToggle)
+                .AddToggle(ZippyMagicBlastsToggle)
+                .AddToggle(BasicBlastsToggle)
 
                 .AddSubHeader(LocalizedStrings.Settings_DollroomFilters)
                 .AddToggle(DollRoomColorAdjustmentsFilterToggle)
