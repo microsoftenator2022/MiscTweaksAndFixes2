@@ -44,11 +44,11 @@ namespace MiscTweaksAndFixes.Fixes
         [Init]
         public static void Init()
         {
-            if (!Enabled) return;
-
             PatchContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintBuff.StrengthBlessingMajorBuff)
                 .Map((BlueprintBuff bp) =>
                 {
+                    if (!Enabled) return;
+
                     MicroLogger.Debug(() => $"{nameof(StrengthBlessingMajorHeavyArmor)}");
 
                     bp.RemoveComponents(c => c is ArmorSpeedPenaltyRemoval);
