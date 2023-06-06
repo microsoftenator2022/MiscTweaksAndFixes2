@@ -68,12 +68,17 @@ namespace MiscTweaksAndFixes.Tweaks
         [Init]
         public static void Init()
         {
-            if (!Enabled) return;
+
 
             var initContext = new BlueprintInitializationContext(Triggers.BlueprintsCache_Init);
 
             initContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.ZippyMagicFeature)
-                .Map(feature => feature.AddComponent<ZippyMagicBlastsComponent>())
+                .Map(feature =>
+                {
+                    if (!Enabled) return;
+
+                    feature.AddComponent<ZippyMagicBlastsComponent>();
+                })
                 .Register();
         }
     }

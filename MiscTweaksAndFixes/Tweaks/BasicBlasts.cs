@@ -84,12 +84,14 @@ namespace MiscTweaksAndFixes.Tweaks
         [Init]
         internal static void Init()
         {
-            if (!Enabled) return;
+            
 
             var initContext = new BlueprintInitializationContext(Triggers.BlueprintsCache_Init);
 
             initContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeatureSelection.ElementalFocusSelection_1f3a15a3ae8a5524ab8b97f469bf4e3d)
                 .Map((BlueprintFeatureSelection s) => {
+                    if (!Enabled) return;
+
                     var elements = s.AllFeatures
                         .OfType<BlueprintProgression>();
 
