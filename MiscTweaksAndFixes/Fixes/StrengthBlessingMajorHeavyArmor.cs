@@ -53,8 +53,6 @@ namespace MiscTweaksAndFixes.Fixes
 
                     bp.RemoveComponents(c => c is ArmorSpeedPenaltyRemoval);
                     bp.AddComponent<HeavyArmorSpeedPenaltyRemoval>();
-
-                    return bp;
                 })
                 .Register();
         }
