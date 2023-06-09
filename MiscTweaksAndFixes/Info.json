@@ -1,6 +1,6 @@
 {
   "Id": "MiscTweaksAndFixes",
-  "Version": "2.2.0-preview",
+  "Version": "2.2.0",
   "AssemblyName": "MicroWrath.Loader.dll",
   "EntryMethod": "MicroWrath.MicroMod.Load",
 
