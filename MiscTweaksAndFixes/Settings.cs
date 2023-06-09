@@ -220,9 +220,9 @@ namespace MiscTweaksAndFixes
             "In some cases, enchanted natural weapons require a Knowledge (Arcana) check to identify." +
             " Instead, automatically identify natural weapons on equip.";
 
-        private static Toggle IdentifyNaturalWeapons =>
+        private static Toggle IdentifyNaturalWeaponsToggle =>
             CreateSettingToggle(
-                nameof(IdentifyNaturalWeapons),
+                nameof(IdentifyNaturalWeaponsToggle),
                 defaultValue: true,
                 description: LocalizedStrings.Settings_IdentifyNaturalWeaponsDescription,
                 longDescription: LocalizedStrings.Settings_IdentifyNaturalWeaponsLongDescription,
@@ -237,13 +237,41 @@ namespace MiscTweaksAndFixes
             " Force selection of the \"best\" empty hand replacement weapon.\n" +
             "May only be needed if using Natural Weapon Stacking.";
 
-        private static Toggle EquipBestEmptyHandWeapon =>
+        private static Toggle EquipBestEmptyHandWeaponToggle =>
             CreateSettingToggle(
-                nameof(EquipBestEmptyHandWeapon),
+                nameof(EquipBestEmptyHandWeaponToggle),
                 defaultValue: true,
                 description: LocalizedStrings.Settings_EquipBestEmptyHandWeaponDescription,
                 longDescription: LocalizedStrings.Settings_EquipBestEmptyHandWeaponLongDescription,
                 onChanged: value => NaturalWeapons.EquipBestEmptyHandWeapon = value);
+
+        [LocalizedString]
+        public const string ZippyMagicBlastsDescription = "Zippy Magic Blasts";
+        [LocalizedString]
+        public const string ZippyMagicBlastsLongDescription = "Makes Zippy Magic also apply to kineticists' (ranged) energy blasts.\nRequires restart.";
+
+        private static Toggle ZippyMagicBlastsToggle =>
+            CreateSettingToggle(nameof(ZippyMagicBlastsToggle),
+                defaultValue: false,
+                description: LocalizedStrings.Settings_ZippyMagicBlastsDescription,
+                longDescription: LocalizedStrings.Settings_ZippyMagicBlastsLongDescription,
+                onChanged: value => ZippyMagicBlasts.Enabled = value);
+
+        [LocalizedString]
+        public const string BasicBlastsDescription = "Extra basic blasts";
+        [LocalizedString]
+        public const string BasicBlastsLongDescription =
+            "Whenever a kineticist selects an element focus that has more than one blast type (eg. water or air)," +
+            " they also gain a weak version of the other basic blast. This blast does not advance in die count and cannot have form" +
+            " infusions applied to it. It also cannot qualify as a prerequisite for feats, infusions, wild talents, etc.\nRequires restart.";
+
+        private static Toggle BasicBlastsToggle =>
+            CreateSettingToggle(
+                nameof(BasicBlastsToggle),
+                defaultValue: false,
+                description: LocalizedStrings.Settings_BasicBlastsDescription,
+                longDescription: LocalizedStrings.Settings_BasicBlastsLongDescription,
+                onChanged: value => BasicBlasts.Enabled = value);
 
         internal static void SettingsInit()
         {
@@ -253,12 +281,14 @@ namespace MiscTweaksAndFixes
                 .AddSubHeader(LocalizedStrings.Settings_FixesSubHeading)
                 .AddToggle(BookOfDreamsToggle)
                 .AddToggle(StrengthBlessingMajorFixToggle)
-                .AddToggle(IdentifyNaturalWeapons)
-                .AddToggle(EquipBestEmptyHandWeapon)
+                .AddToggle(IdentifyNaturalWeaponsToggle)
+                .AddToggle(EquipBestEmptyHandWeaponToggle)
                 
                 .AddSubHeader(LocalizedStrings.Settings_TweaksSubHeading)
                 .AddToggle(NaturalWeaponStackingToggle)
                 .AddToggle(ReformedFiendDRToggle)
+                .AddToggle(ZippyMagicBlastsToggle)
+                .AddToggle(BasicBlastsToggle)
 
                 .AddSubHeader(LocalizedStrings.Settings_DollroomFilters)
                 .AddToggle(DollRoomColorAdjustmentsFilterToggle)
