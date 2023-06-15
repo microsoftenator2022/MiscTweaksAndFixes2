@@ -27,32 +27,32 @@ namespace MiscTweaksAndFixes
     internal static partial class Settings
     {
         // Proof of concept. UMM can have multiple entry points to one assembly
-        internal static void EnableDebugLogging(UnityModManager.ModEntry modEntry)
-        {
-            modEntry.OnUnload = _ => DisableDebugLogging();
+        //internal static void EnableDebugLogging(UnityModManager.ModEntry modEntry)
+        //{
+        //    modEntry.OnUnload = _ => DisableDebugLogging();
 
-            modEntry.OnToggle = (modEntry, state) =>
-            {
-                if (state)
+        //    modEntry.OnToggle = (modEntry, state) =>
+        //    {
+        //        if (state)
 
-                {
-                    modEntry.Logger.Log("Enabling debug logging");
+        //        {
+        //            modEntry.Logger.Log("Enabling debug logging");
                 
-                    DebugLogging = true;
-                }
-                else
-                {
-                    modEntry.Logger.Log("Disabling debug logging");
+        //            DebugLogging = true;
+        //        }
+        //        else
+        //        {
+        //            modEntry.Logger.Log("Disabling debug logging");
 
-                    DebugLogging = false;
-                }
+        //            DebugLogging = false;
+        //        }
 
-                return true;
-            };
+        //        return true;
+        //    };
             
-        }
+        //}
 
-        internal static bool DisableDebugLogging() => true;
+        //internal static bool DisableDebugLogging() => true;
 
         private static bool debugLogging;
         public static bool DebugLogging
