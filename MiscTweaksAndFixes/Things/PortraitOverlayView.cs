@@ -55,10 +55,15 @@ namespace MiscTweaksAndFixes.Things
 
             private static void OnInitialize(ViewBase<PartyCharacterVM> __instance)
             {
-                //if (CreateNew(__instance)
+
+
+#if DEBUG
                 if (CreateNew(__instance,
                     foreground: AddedContent.RipAndTear.RipAndTear.GetSprite("STFST01"),
                     background: AddedContent.RipAndTear.RipAndTear.GetSprite("STFB1"))
+#else
+                if (CreateNew(__instance)
+#endif
                     is not var (_, po)) return;
 
                 __instance.AddDisposable(po);

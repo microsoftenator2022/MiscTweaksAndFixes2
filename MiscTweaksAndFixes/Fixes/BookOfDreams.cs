@@ -18,7 +18,7 @@ namespace MiscTweaksAndFixes.Fixes
     {
         public const string BookOfDreamsItemConvert_v2 = "8ea9114c683e4f218af674575aefcd57";
 
-        internal static bool Enabled = true;
+        internal static bool Enabled = false;
 
         private static readonly BlueprintInitializationContext PatchContext = new(Triggers.BlueprintsCache_Init);
 
@@ -34,11 +34,11 @@ namespace MiscTweaksAndFixes.Fixes
         [Init]
         internal static void Init()
         {
-            if (!Enabled) return;
-
             PatchContext.GetBlueprint(new MicroBlueprint<BlueprintPlayerUpgrader>(BookOfDreamsItemConvert_v2))
                 .Map(bp =>
                 {
+                    if (!Enabled) return;
+
                     MicroLogger.Debug(() => $"{nameof(BookOfDreams)}");
 
                     EventBus.Subscribe(new EtudesUpdateEventHandler(() => {

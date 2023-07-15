@@ -8,8 +8,6 @@ using Kingmaker.Localization;
 
 using UniRx;
 
-using UnityModManagerNet;
-
 using ModMenu;
 using ModMenu.Settings;
 
@@ -66,11 +64,11 @@ namespace MiscTweaksAndFixes
             private set
             {
                 debugLogging = value;
-                MicroLogger.SetUmmLogLevel(value ? MicroLogger.Severity.Debug : MicroLogger.Severity.Info);
+                MicroLogger.SetLogLevel(value ? MicroLogger.Severity.Debug : MicroLogger.Severity.Info);
             }
         }
 
-        private static string SettingsRootKey => $"{Main.Instance.ModEntry.Info.Id}".ToLower();
+        private static string SettingsRootKey => Main.Instance?.ModEntry?.Info?.Id?.ToLower()!;
         private static string SettingKey(string key) => $"{SettingsRootKey}.{key}".ToLower();
 
         private static Toggle CreateSettingToggle(string name, LocalizedString description,

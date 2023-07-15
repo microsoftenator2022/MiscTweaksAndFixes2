@@ -335,15 +335,15 @@ namespace MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking
         {
             if (Settings.DebugLogging)
             {
-                if (weapon.Wielder is null)
-                {
-                    MicroLogger.Debug(() => $"Wielder is null for weapon {weapon.Name}");
+                //if (weapon.Wielder is null)
+                //{
+                //    MicroLogger.Debug(() => $"Wielder is null for weapon {weapon.Name}");
 
-                    if (weapon.Blueprint is BlueprintItemWeapon weaponBp)
-                    {
-                        MicroLogger.Debug(() => $"Blueprint {weaponBp.AssetGuid} ({weaponBp.name})");
-                    }
-                }
+                //    if (weapon.Blueprint is BlueprintItemWeapon weaponBp)
+                //    {
+                //        MicroLogger.Debug(() => $"Blueprint {weaponBp.AssetGuid} ({weaponBp.name})");
+                //    }
+                //}
             }
         }
 
