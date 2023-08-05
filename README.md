@@ -52,8 +52,6 @@ Disabled by default.
 
 Allows you to disable some postprocess filters in the dollroom (inventory screen, character creation. mythic level up, etc.)
 
-## Now includes fix for the "Kingmaker.Localization.SharedStringAsset must be instantiated using the ScriptableObject.CreateInstance method instead of new SharedStringAsset." log spam
-
 ## Acknowledgements
 
 * Special thanks to the modding community on [Discord](https://discord.com/invite/wotr) - in particular, Pheonix99 and Bubbles.
