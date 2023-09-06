@@ -310,6 +310,6 @@ namespace MiscTweaksAndFixes
 
         [Init]
         internal static void Init() =>
-            Triggers.BlueprintsCache_Init_Early.Take(1).Subscribe(_ => SettingsInit());
+            Triggers.BlueprintsCache_Init_Early.Subscribe(_ => SettingsInit());
     }
 }
