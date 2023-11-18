@@ -43,7 +43,7 @@ namespace MiscTweaksAndFixes.Fixes
 
                     EventBus.Subscribe(new EtudesUpdateEventHandler(() => {
                         MicroLogger.Debug(() => "Running Book of Dreams updater");
-                        bp.m_Actions.Run();
+                        bp!.m_Actions.Run();
                     }));
                 })
                 .Register();

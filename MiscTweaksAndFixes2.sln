@@ -5,12 +5,6 @@ VisualStudioVersion = 17.6.33606.364
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MiscTweaksAndFixes", "MiscTweaksAndFixes\MiscTweaksAndFixes.csproj", "{04D94845-2AC9-46B4-9B3F-6FF98248B942}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MicroWrath", "..\MicroWrath\MicroWrath\MicroWrath.csproj", "{46CD8B74-F5E4-4F5A-9A1E-4C5D047147FD}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MicroWrath.Generator", "..\MicroWrath\MicroWrath.Generator\MicroWrath.Generator.csproj", "{88DD8720-AE74-424C-96A1-4FD5037E93F8}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MicroWrath.Loader", "..\MicroWrath\MicroWrath.Loader\MicroWrath.Loader.csproj", "{2AB1630E-6280-43CB-ACE8-3012446DDE44}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wat", "Wat\Wat.csproj", "{FEA2483D-7495-4467-9B6B-1A05DA534BFD}"
 EndProject
 Global
@@ -23,18 +17,6 @@ Global
 		{04D94845-2AC9-46B4-9B3F-6FF98248B942}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04D94845-2AC9-46B4-9B3F-6FF98248B942}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04D94845-2AC9-46B4-9B3F-6FF98248B942}.Release|Any CPU.Build.0 = Release|Any CPU
-		{46CD8B74-F5E4-4F5A-9A1E-4C5D047147FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{46CD8B74-F5E4-4F5A-9A1E-4C5D047147FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{46CD8B74-F5E4-4F5A-9A1E-4C5D047147FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{46CD8B74-F5E4-4F5A-9A1E-4C5D047147FD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{88DD8720-AE74-424C-96A1-4FD5037E93F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{88DD8720-AE74-424C-96A1-4FD5037E93F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{88DD8720-AE74-424C-96A1-4FD5037E93F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{88DD8720-AE74-424C-96A1-4FD5037E93F8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2AB1630E-6280-43CB-ACE8-3012446DDE44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2AB1630E-6280-43CB-ACE8-3012446DDE44}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2AB1630E-6280-43CB-ACE8-3012446DDE44}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2AB1630E-6280-43CB-ACE8-3012446DDE44}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FEA2483D-7495-4467-9B6B-1A05DA534BFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FEA2483D-7495-4467-9B6B-1A05DA534BFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FEA2483D-7495-4467-9B6B-1A05DA534BFD}.Release|Any CPU.ActiveCfg = Release|Any CPU

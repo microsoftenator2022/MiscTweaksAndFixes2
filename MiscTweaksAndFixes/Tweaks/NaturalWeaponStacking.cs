@@ -213,7 +213,7 @@ namespace MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking
                     .ToArray();
 
             // Special case for bloodrager draconic claws
-            if (unit.Buffs.HasFact(BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicBaseBuff.GetBlueprint()!))
+            if (unit.Buffs.HasFact(BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicBaseBuff.Blueprint))
             {
                 MicroLogger.Debug(() => "Draconic bloodrager handler");
 

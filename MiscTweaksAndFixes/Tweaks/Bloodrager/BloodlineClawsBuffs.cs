@@ -19,51 +19,51 @@ namespace MiscTweaksAndFixes.Tweaks.Bloodrager
     {
         private static readonly Lazy<BlueprintFeature[]> clawFeatures = new(() => new[]
         {
-            BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature1.GetBlueprint()!,
-            BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconiclClawFeature4.GetBlueprint()!,
-            BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature8.GetBlueprint()!,
-            BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature12Acid.GetBlueprint()!,
-            BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature12Cold.GetBlueprint()!,
-            BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature12Electricity.GetBlueprint()!,
-            BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature12Fire.GetBlueprint()!
+            BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature1.Blueprint,
+            BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconiclClawFeature4.Blueprint,
+            BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature8.Blueprint,
+            BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature12Acid.Blueprint,
+            BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature12Cold.Blueprint,
+            BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature12Electricity.Blueprint,
+            BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature12Fire.Blueprint
         });
         internal static IReadOnlyCollection<BlueprintFeature> ClawFeatures => clawFeatures.Value;
 
         private static readonly Lazy<BlueprintBuff[]> clawBuffs = new(() => new[]
         {
-            BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff1.GetBlueprint()!,
-            BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff4.GetBlueprint()!,
-            BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff8.GetBlueprint()!,
-            BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff12Acid.GetBlueprint()!,
-            BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff12Cold.GetBlueprint()!,
-            BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff12Electricity.GetBlueprint()!,
-            BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff12Fire.GetBlueprint()!,
+            BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff1.Blueprint,
+            BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff4.Blueprint,
+            BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff8.Blueprint,
+            BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff12Acid.Blueprint,
+            BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff12Cold.Blueprint,
+            BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff12Electricity.Blueprint,
+            BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff12Fire.Blueprint,
         });
 
         internal static IReadOnlyCollection<BlueprintBuff> ClawBuffs => clawBuffs.Value;
 
         private static readonly Lazy<Dictionary<BlueprintFeature, BlueprintBuff>> featureBuffMap = new(() => new()
         {
-            { BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature1.GetBlueprint()!,
-                BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff1.GetBlueprint()! },
+            { BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature1.Blueprint,
+                BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff1.Blueprint },
 
-            { BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconiclClawFeature4.GetBlueprint()!,
-                BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff4.GetBlueprint()! },
+            { BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconiclClawFeature4.Blueprint,
+                BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff4.Blueprint },
 
-            { BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature8.GetBlueprint()!,
-                BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff8.GetBlueprint()! },
+            { BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature8.Blueprint,
+                BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff8.Blueprint },
 
-            { BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature12Acid.GetBlueprint()!,
-                BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff12Acid.GetBlueprint()! },
+            { BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature12Acid.Blueprint,
+                BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff12Acid.Blueprint },
 
-            { BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature12Cold.GetBlueprint()!,
-                BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff12Cold.GetBlueprint()! },
+            { BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature12Cold.Blueprint,
+                BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff12Cold.Blueprint },
 
-            {BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature12Electricity.GetBlueprint()!,
-                BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff12Electricity.GetBlueprint()! },
+            {BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature12Electricity.Blueprint,
+                BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff12Electricity.Blueprint },
 
-            { BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature12Fire.GetBlueprint()!,
-                BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff12Fire.GetBlueprint()! },
+            { BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicClawFeature12Fire.Blueprint,
+                BlueprintsDb.Owlcat.BlueprintBuff.BloodragerDraconicClawBuff12Fire.Blueprint },
         });
         internal static IReadOnlyDictionary<BlueprintFeature, BlueprintBuff> FeatureBuffMap => featureBuffMap.Value;
 
@@ -83,7 +83,7 @@ namespace MiscTweaksAndFixes.Tweaks.Bloodrager
                 if (levelEntries is null) return false;
 
                 return levelEntries.Features
-                        .Contains(BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicBaseFeature.GetBlueprint()!);
+                        .Contains(BlueprintsDb.Owlcat.BlueprintFeature.BloodragerDraconicBaseFeature.Blueprint);
             }
 
             var progressions = unit.Progression.m_Progressions.Values;

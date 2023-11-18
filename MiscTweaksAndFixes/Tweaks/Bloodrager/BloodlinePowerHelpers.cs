@@ -62,7 +62,7 @@ namespace MiscTweaksAndFixes.Tweaks.Bloodrager
 
         internal static IDictionary<BlueprintProgression, BloodlinePowers> GetPowersByBloodline()
         {
-            var bloodlineSelection = BlueprintsDb.Owlcat.BlueprintFeatureSelection.BloodragerBloodlineSelection.GetBlueprint()!;
+            var bloodlineSelection = BlueprintsDb.Owlcat.BlueprintFeatureSelection.BloodragerBloodlineSelection.Blueprint;
             var bloodlines = bloodlineSelection.m_AllFeatures.Select(f => f.Get()).OfType<BlueprintProgression>();
 
             MicroLogger.Debug(() => $"{bloodlines.Count()} bloodlines");
