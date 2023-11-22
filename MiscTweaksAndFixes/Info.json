@@ -1,6 +1,6 @@
 {
   "Id": "MiscTweaksAndFixes",
-  "Version": "2.2.2",
+  "Version": "2.3.0",
   "AssemblyName": "MicroWrath.Loader.dll",
   "EntryMethod": "MicroWrath.MicroMod.Load",
 
@@ -9,7 +9,7 @@
   "Author": "microsoftenator",
 
   "Requirements": [ "ModMenu-1.3.0" ],
-  "GameVersion": "2.1.3",
+  "GameVersion": "2.2.0",
 
   "HomePage": "https://github.com/microsoftenator2022/MiscTweaksAndFixes2",
   "Repository": "https://raw.githubusercontent.com/microsoftenator2022/MiscTweaksAndFixes2/master/Repository.json"
