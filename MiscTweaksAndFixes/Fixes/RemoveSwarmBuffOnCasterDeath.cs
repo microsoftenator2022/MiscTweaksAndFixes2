@@ -105,35 +105,37 @@ namespace MiscTweaksAndFixes.Fixes
             //}
             //#endif
 
-            [HarmonyPatch(
-                typeof(DropLootAndDestroyOnDeactivate),
-                nameof(DropLootAndDestroyOnDeactivate.OnDeactivate))]
-            [HarmonyTranspiler]
-            static IEnumerable<CodeInstruction> DropLootAndDestroyOnDeactivate_OnDeactivate_Patch(
-                IEnumerable<CodeInstruction> instructions)
-            {
-                var callIndex = instructions.FindIndex(ci =>
-                    ci.Calls(AccessTools.Method(
-                        typeof(EntityDataBase),
-                        nameof(EntityDataBase.MarkForDestroy))));
+            // No longer needed as of 2.2.0as
 
-                if (callIndex < 0)
-                    return instructions;
+            //[HarmonyPatch(
+            //    typeof(DropLootAndDestroyOnDeactivate),
+            //    nameof(DropLootAndDestroyOnDeactivate.OnDeactivate))]
+            //[HarmonyTranspiler]
+            //static IEnumerable<CodeInstruction> DropLootAndDestroyOnDeactivate_OnDeactivate_Patch(
+            //    IEnumerable<CodeInstruction> instructions)
+            //{
+            //    var callIndex = instructions.FindIndex(ci =>
+            //        ci.Calls(AccessTools.Method(
+            //            typeof(EntityDataBase),
+            //            nameof(EntityDataBase.MarkForDestroy))));
 
-                var iList = instructions.ToList();
+            //    if (callIndex < 0)
+            //        return instructions;
 
-                iList.InsertRange(callIndex, new[]
-                {
-                    new CodeInstruction(OpCodes.Dup),
-                    new CodeInstruction(OpCodes.Ldc_I4_0),
-                    new CodeInstruction(OpCodes.Call,
-                        AccessTools.PropertySetter(
-                            typeof(EntityDataBase),
-                            nameof(EntityDataBase.IsInGame)))
-                });
+            //    var iList = instructions.ToList();
 
-                return iList;
-            }
+            //    iList.InsertRange(callIndex, new[]
+            //    {
+            //        new CodeInstruction(OpCodes.Dup),
+            //        new CodeInstruction(OpCodes.Ldc_I4_0),
+            //        new CodeInstruction(OpCodes.Call,
+            //            AccessTools.PropertySetter(
+            //                typeof(EntityDataBase),
+            //                nameof(EntityDataBase.IsInGame)))
+            //    });
+
+            //    return iList;
+            //}
 
             //[HarmonyPatch(typeof(SummonedUnitBuff), nameof(SummonedUnitBuff.OnRemoved))]
             //[HarmonyPrefix]
