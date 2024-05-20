@@ -56,103 +56,103 @@ namespace MiscTweaksAndFixes.Fixes
     //    }
     //}
 
-    internal static class RemoveSwarmBuffOnCasterDeath
-    {
-        [HarmonyPatch]
-        internal static class Patch
-        {
-            //[HarmonyPatch(typeof(UnitEntityData), nameof(UnitEntityData.OnDispose))]
-            //[HarmonyPrefix]
-            //static void UnitEntityData_OnDispose_Prefix(UnitEntityData __instance)
-            //{
-            //    MicroLogger.Debug(() => $"{nameof(UnitEntityData_OnDispose_Prefix)}");
-            //    MicroLogger.Debug(() => $"{__instance}");
-            //}
+//    internal static class RemoveSwarmBuffOnCasterDeath
+//    {
+//        [HarmonyPatch]
+//        internal static class Patch
+//        {
+//            [HarmonyPatch(typeof(UnitEntityData), nameof(UnitEntityData.OnDispose))]
+//            [HarmonyPrefix]
+//            static void UnitEntityData_OnDispose_Prefix(UnitEntityData __instance)
+//            {
+//                MicroLogger.Debug(() => $"{nameof(UnitEntityData_OnDispose_Prefix)}");
+//                MicroLogger.Debug(() => $"{__instance}");
+//            }
 
-            //[HarmonyPatch(typeof(EntityFactsManager), nameof(EntityFactsManager.Dispose))]
-            //[HarmonyPrefix]
-            //static void EntityFactsManager_Dispose_Prefix(EntityFactsManager __instance)
-            //{
-            //    MicroLogger.Debug(() => nameof(EntityFactsManager_Dispose_Prefix));
-            //    MicroLogger.Debug(() => $"Owner: {__instance.Owner}");
-            //}
+//            [HarmonyPatch(typeof(EntityFactsManager), nameof(EntityFactsManager.Dispose))]
+//            [HarmonyPrefix]
+//            static void EntityFactsManager_Dispose_Prefix(EntityFactsManager __instance)
+//            {
+//                MicroLogger.Debug(() => nameof(EntityFactsManager_Dispose_Prefix));
+//                MicroLogger.Debug(() => $"Owner: {__instance.Owner}");
+//            }
 
-            //[HarmonyPatch(typeof(EntityFactsManager), nameof(EntityFactsManager.Dispose))]
-            //[HarmonyPostfix]
-            //static void EntityFactsManager_Dispose_Postfix(EntityFactsManager __instance)
-            //{
-            //    MicroLogger.Debug(() => nameof(EntityFactsManager_Dispose_Postfix));
-            //    MicroLogger.Debug(() => $"Owner: {__instance.Owner}");
-            //}
+//            [HarmonyPatch(typeof(EntityFactsManager), nameof(EntityFactsManager.Dispose))]
+//            [HarmonyPostfix]
+//            static void EntityFactsManager_Dispose_Postfix(EntityFactsManager __instance)
+//            {
+//                MicroLogger.Debug(() => nameof(EntityFactsManager_Dispose_Postfix));
+//                MicroLogger.Debug(() => $"Owner: {__instance.Owner}");
+//            }
 
-            //#if DEBUG
-            //[HarmonyPatch(typeof(AreaEffectsController), nameof(AreaEffectsController.Deactivate))]
-            //[HarmonyPrefix]
-            //static void AreaEffectsController_Deactivate_Prefix(AreaEffectsController __instance)
-            //{
-            //    MicroLogger.Debug(() => nameof(AreaEffectsController_Deactivate_Prefix));
-            //    MicroLogger.Debug(() =>
-            //    {
-            //        var sb = new StringBuilder();
+//#if DEBUG
+//            [HarmonyPatch(typeof(AreaEffectsController), nameof(AreaEffectsController.Deactivate))]
+//            [HarmonyPrefix]
+//            static void AreaEffectsController_Deactivate_Prefix(AreaEffectsController __instance)
+//            {
+//                MicroLogger.Debug(() => nameof(AreaEffectsController_Deactivate_Prefix));
+//                MicroLogger.Debug(() =>
+//                {
+//                    var sb = new StringBuilder();
 
-            //        foreach (var e in __instance.m_EffectsToTick.m_EveryFrameUpdates)
-            //        {
-            //            sb.AppendLine($"{e?.ToString() ?? "NULL"}");
-            //        }
+//                    foreach (var e in __instance.m_EffectsToTick.m_EveryFrameUpdates)
+//                    {
+//                        sb.AppendLine($"{e?.ToString() ?? "NULL"}");
+//                    }
 
-            //        return sb.ToString();
-            //    });
-            //}
-            //#endif
+//                    return sb.ToString();
+//                });
+//            }
+//#endif
 
-            // No longer needed as of 2.2.0as
+//            No longer needed as of 2.2.0as
 
-            //[HarmonyPatch(
-            //    typeof(DropLootAndDestroyOnDeactivate),
-            //    nameof(DropLootAndDestroyOnDeactivate.OnDeactivate))]
-            //[HarmonyTranspiler]
-            //static IEnumerable<CodeInstruction> DropLootAndDestroyOnDeactivate_OnDeactivate_Patch(
-            //    IEnumerable<CodeInstruction> instructions)
-            //{
-            //    var callIndex = instructions.FindIndex(ci =>
-            //        ci.Calls(AccessTools.Method(
-            //            typeof(EntityDataBase),
-            //            nameof(EntityDataBase.MarkForDestroy))));
+//            [HarmonyPatch(
+//                typeof(DropLootAndDestroyOnDeactivate),
+//                nameof(DropLootAndDestroyOnDeactivate.OnDeactivate))]
+//            [HarmonyTranspiler]
+//            static IEnumerable<CodeInstruction> DropLootAndDestroyOnDeactivate_OnDeactivate_Patch(
+//                IEnumerable<CodeInstruction> instructions)
+//            {
+//                var callIndex = instructions.FindIndex(ci =>
+//                    ci.Calls(AccessTools.Method(
+//                        typeof(EntityDataBase),
+//                        nameof(EntityDataBase.MarkForDestroy))));
 
-            //    if (callIndex < 0)
-            //        return instructions;
+//                if (callIndex < 0)
+//                    return instructions;
 
-            //    var iList = instructions.ToList();
+//                var iList = instructions.ToList();
 
-            //    iList.InsertRange(callIndex, new[]
-            //    {
-            //        new CodeInstruction(OpCodes.Dup),
-            //        new CodeInstruction(OpCodes.Ldc_I4_0),
-            //        new CodeInstruction(OpCodes.Call,
-            //            AccessTools.PropertySetter(
-            //                typeof(EntityDataBase),
-            //                nameof(EntityDataBase.IsInGame)))
-            //    });
+//                iList.InsertRange(callIndex, new[]
+//                {
+//                    new CodeInstruction(OpCodes.Dup),
+//                    new CodeInstruction(OpCodes.Ldc_I4_0),
+//                    new CodeInstruction(OpCodes.Call,
+//                        AccessTools.PropertySetter(
+//                            typeof(EntityDataBase),
+//                            nameof(EntityDataBase.IsInGame)))
+//                });
 
-            //    return iList;
-            //}
+//                return iList;
+//            }
 
-            //[HarmonyPatch(typeof(SummonedUnitBuff), nameof(SummonedUnitBuff.OnRemoved))]
-            //[HarmonyPrefix]
-            //static void SummonedUnitBuff_OnRemoved()
-            //{
-            //    #if DEBUG
-            //    Debugger.Break();
-            //    #endif
-            //}
+//            [HarmonyPatch(typeof(SummonedUnitBuff), nameof(SummonedUnitBuff.OnRemoved))]
+//            [HarmonyPrefix]
+//            static void SummonedUnitBuff_OnRemoved()
+//            {
+//#if DEBUG
+//                Debugger.Break();
+//#endif
+//            }
 
-            //[HarmonyPatch(typeof(Buff), nameof(Buff.OnDetach))]
-            //[HarmonyPrefix]
-            //static void Buff_OnDetach_Prefix(Buff __instance)
-            //{
-            //    MicroLogger.Debug(() => nameof(Buff_OnDetach_Prefix));
-            //    MicroLogger.Debug(() => $"{__instance}");
-            //}
-        }
-    }
+//            [HarmonyPatch(typeof(Buff), nameof(Buff.OnDetach))]
+//            [HarmonyPrefix]
+//            static void Buff_OnDetach_Prefix(Buff __instance)
+//            {
+//                MicroLogger.Debug(() => nameof(Buff_OnDetach_Prefix));
+//                MicroLogger.Debug(() => $"{__instance}");
+//            }
+//        }
+//    }
 }

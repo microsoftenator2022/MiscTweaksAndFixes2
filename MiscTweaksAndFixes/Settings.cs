@@ -18,6 +18,7 @@ using MiscTweaksAndFixes.Fixes;
 using MiscTweaksAndFixes.Tweaks;
 using MiscTweaksAndFixes.Tweaks.NaturalWeaponStacking;
 using MiscTweaksAndFixes.AddedContent.RipAndTear;
+using MiscTweaksAndFixes.Tweaks.MythicSuperiorSummoning;
 
 namespace MiscTweaksAndFixes
 {
@@ -271,6 +272,21 @@ namespace MiscTweaksAndFixes
                 longDescription: LocalizedStrings.Settings_BasicBlastsLongDescription,
                 onChanged: value => BasicBlasts.Enabled = value);
 
+        [LocalizedString]
+        public const string MythicSuperiorSummoningDescription = Tweaks.MythicSuperiorSummoning.MythicSuperiorSummoning.DisplayName;
+
+        [LocalizedString]
+        public const string MythicSuperiorSummoningLongDescription = "A mythic variant of Superior Summoning that adds +1 to any summon ability";
+
+        private static Toggle MythicSuperiorSummoningToggle =>
+            CreateSettingToggle(
+                nameof(MythicSuperiorSummoningToggle),
+                defaultValue: true,
+                description: LocalizedStrings.Settings_MythicSuperiorSummoningDescription,
+                longDescription: LocalizedStrings.Settings_MythicSuperiorSummoningLongDescription,
+                onChanged: value => MythicSuperiorSummoning.Enabled = value
+            );
+
         internal static void SettingsInit()
         {
             var settings = SettingsBuilder
@@ -287,6 +303,7 @@ namespace MiscTweaksAndFixes
                 .AddToggle(ReformedFiendDRToggle)
                 .AddToggle(ZippyMagicBlastsToggle)
                 .AddToggle(BasicBlastsToggle)
+                .AddToggle(MythicSuperiorSummoningToggle)
 
                 .AddSubHeader(LocalizedStrings.Settings_DollroomFilters)
                 .AddToggle(DollRoomColorAdjustmentsFilterToggle)

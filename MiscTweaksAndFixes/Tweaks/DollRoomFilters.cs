@@ -8,6 +8,8 @@ using HarmonyLib;
 
 using Kingmaker.UI.ServiceWindow;
 
+using MicroWrath;
+
 using Owlcat.Runtime.Visual.RenderPipeline.PostProcess;
 
 namespace MiscTweaksAndFixes.Tweaks
@@ -25,8 +27,27 @@ namespace MiscTweaksAndFixes.Tweaks
         {
             var postProcessingVolume = __instance.GetComponentInChildren<UnityEngine.Rendering.Volume>();
 
-            postProcessingVolume.profile.components.FirstOrDefault(c => c is ColorAdjustments).active = DollRoomFilters.ColorAdjustmentsFilter;
-            postProcessingVolume.profile.components.FirstOrDefault(c => c is SlopePowerOffset).active = DollRoomFilters.SlopePowerOffsetFilter;
+            if (postProcessingVolume == null)
+            {
+                MicroLogger.Warning($"{nameof(UnityEngine.Rendering.Volume)} component not found");
+                return;
+            }
+
+            if (postProcessingVolume.profile == null || postProcessingVolume.profile.components == null)
+            {
+                MicroLogger.Warning($"$missing {nameof(postProcessingVolume)} profile or components");
+                return;
+            }
+
+            if (postProcessingVolume.profile.components.FirstOrDefault(c => c is ColorAdjustments) is { } ca)
+                ca.active = DollRoomFilters.ColorAdjustmentsFilter;
+            else
+                MicroLogger.Warning($"{nameof(ColorAdjustments)} component not found");
+
+            if (postProcessingVolume.profile.components.FirstOrDefault(c => c is SlopePowerOffset) is { } spo)
+                spo.active = DollRoomFilters.SlopePowerOffsetFilter;
+            else
+                MicroLogger.Warning($"{nameof(SlopePowerOffset)} component not found");
         }
     }
 }
