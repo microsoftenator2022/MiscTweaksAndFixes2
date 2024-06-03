@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if DEBUG
+using System;
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,16 +23,29 @@ namespace MiscTweaksAndFixes.AddedContent
 
         public bool VariableOnly;
 
-        public void HandleCalculateSummonUnitsCount(UnitEntityData unit, DiceType diceType, int diceCount, int diceBonus, ref int count)
+        //public void HandleCalculateSummonUnitsCount(UnitEntityData unit, DiceType diceType, int diceCount, int diceBonus, ref int count)
+        //{
+        //    if (unit != this.Owner)
+        //        return;
+
+        //    if (this.VariableOnly && (diceType is DiceType.Zero or DiceType.One || diceCount < 1))
+        //        return;
+
+        //    if ((diceType is not DiceType.Zero && diceCount > 0) || diceBonus > 1)
+        //        count += this.ExtraCount.Calculate(base.Context);
+        //}
+
+        public void HandleCalculateSummonUnitsCount(MechanicsContext mechanicsContext, ContextDiceValue contextDiceValue, ref int count)
         {
-            if (unit != this.Owner)
+            if (mechanicsContext.MaybeCaster != this.Owner)
                 return;
 
-            if (this.VariableOnly && (diceType is DiceType.Zero or DiceType.One || diceCount < 1))
+            if (this.VariableOnly && (!contextDiceValue.IsVariable || contextDiceValue.DiceCountValue.IsZero))
                 return;
 
-            if ((diceType is not DiceType.Zero && diceCount > 0) || diceBonus > 1)
+            if ((contextDiceValue.DiceType is not DiceType.Zero && !contextDiceValue.DiceCountValue.IsZero) || contextDiceValue.BonusValue.Value > 1)
                 count += this.ExtraCount.Calculate(base.Context);
         }
     }
 }
+#endif

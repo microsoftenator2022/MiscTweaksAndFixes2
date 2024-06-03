@@ -13,8 +13,9 @@ using Kingmaker.UnitLogic.FactLogic;
 
 using MicroWrath;
 using MicroWrath.BlueprintsDb;
-using MicroWrath.BlueprintInitializationContext;
+//using MicroWrath.BlueprintInitializationContext;
 using MicroWrath.Constructors;
+using MicroWrath.Internal.InitContext;
 using MicroWrath.Util;
 
 using UniRx;
@@ -25,24 +26,24 @@ namespace MiscTweaksAndFixes.Tweaks
     {
         internal static bool Enabled = true;
 
-        private static readonly BlueprintInitializationContext PatchContext = new (Triggers.BlueprintsCache_Init);
+        //private static readonly BlueprintInitializationContext PatchContext = new (Triggers.BlueprintsCache_Init);
 
         [Init]
         public static void Init()
         {
-            PatchContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.ReformedFiendDamageReductionFeature)
+            InitContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.ReformedFiendDamageReductionFeature)
                 .Map(bp =>
                 {
-                    if (!Enabled) return;
+                    if (!Enabled) return bp;
 
                     MicroLogger.Debug(() => $"{nameof(ReformedFiendDRGood)}");
 
-                    var description = bp?.Description;
+                    var description = bp.Description;
 
-                    if (bp is null || description is null)
+                    if (description is null)
                     {
                         MicroLogger.Error($"{nameof(ReformedFiendDRGood)}: Could not get blueprint or description for feature");
-                        return;
+                        return bp;
                     }
 
                     var damageReductionComponent = bp.Components.OfType<AddDamageResistancePhysical>().FirstOrDefault();
@@ -50,7 +51,7 @@ namespace MiscTweaksAndFixes.Tweaks
                     if (damageReductionComponent is null)
                     {
                         MicroLogger.Error($"{nameof(ReformedFiendDRGood)}: Could not get damage reduction component");
-                        return;
+                        return bp;
                     }
 
                     damageReductionComponent.Alignment = DamageAlignment.Good;
@@ -61,8 +62,10 @@ namespace MiscTweaksAndFixes.Tweaks
                         .Replace("evil", "good");
 
                     LocalizationManager.CurrentPack.PutString(bp.m_Description.Key, description);
+
+                    return bp;
                 })
-                .Register();
+                .RegisterBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.ReformedFiendDamageReductionFeature.BlueprintGuid);
         }
     }
 }

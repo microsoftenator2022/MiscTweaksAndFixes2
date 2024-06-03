@@ -16,10 +16,11 @@ using Kingmaker.UnitLogic.Abilities.Components;
 using Kingmaker.UnitLogic.Mechanics.Actions;
 
 using MicroWrath;
-using MicroWrath.BlueprintInitializationContext;
+//using MicroWrath.BlueprintInitializationContext;
 using MicroWrath.BlueprintsDb;
 using MicroWrath.Extensions;
 using MicroWrath.Extensions.Components;
+using MicroWrath.Internal.InitContext;
 
 namespace MiscTweaksAndFixes.Tweaks
 {
@@ -68,18 +69,18 @@ namespace MiscTweaksAndFixes.Tweaks
         [Init]
         public static void Init()
         {
+            //var initContext = new BlueprintInitializationContext(Triggers.BlueprintsCache_Init);
 
-
-            var initContext = new BlueprintInitializationContext(Triggers.BlueprintsCache_Init);
-
-            initContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.ZippyMagicFeature)
+            InitContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.ZippyMagicFeature)
                 .Map(feature =>
                 {
-                    if (!Enabled) return;
+                    if (!Enabled) return feature;
 
                     feature.AddComponent<ZippyMagicBlastsComponent>();
+
+                    return feature;
                 })
-                .Register();
+                .RegisterBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.ZippyMagicFeature.BlueprintGuid);
         }
     }
 }

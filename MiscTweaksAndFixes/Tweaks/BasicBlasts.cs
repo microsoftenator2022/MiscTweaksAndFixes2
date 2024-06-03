@@ -4,23 +4,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using HarmonyLib;
+
+using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes.Selection;
 using Kingmaker.Blueprints.Classes;
-using Kingmaker.UnitLogic.Abilities.Blueprints;
 using Kingmaker.Designers.Mechanics.Facts;
+using Kingmaker.Localization;
+using Kingmaker.UnitLogic.Abilities.Blueprints;
 using Kingmaker.UnitLogic.Abilities.Components;
 using Kingmaker.UnitLogic.Mechanics.Components;
-using Kingmaker.Blueprints;
 
 using MicroWrath;
 using MicroWrath.BlueprintsDb;
-using MicroWrath.BlueprintInitializationContext;
+//using MicroWrath.BlueprintInitializationContext;
 using MicroWrath.Extensions;
 using MicroWrath.Extensions.Components;
+using MicroWrath.Internal.InitContext;
 using MicroWrath.Util;
 using MicroWrath.Util.Linq;
-using HarmonyLib;
-using Kingmaker.Localization;
 
 namespace MiscTweaksAndFixes.Tweaks
 {
@@ -84,55 +86,57 @@ namespace MiscTweaksAndFixes.Tweaks
         [Init]
         internal static void Init()
         {
-            
+            //var initContext = new BlueprintInitializationContext(Triggers.BlueprintsCache_Init);
 
-            var initContext = new BlueprintInitializationContext(Triggers.BlueprintsCache_Init);
-
-            initContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeatureSelection.ElementalFocusSelection_1f3a15a3ae8a5524ab8b97f469bf4e3d)
+            //initContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeatureSelection.ElementalFocusSelection_1f3a15a3ae8a5524ab8b97f469bf4e3d)
+            InitContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeatureSelection.ElementalFocusSelection_1f3a15a3ae8a5524ab8b97f469bf4e3d)
                 .Map((BlueprintFeatureSelection s) => {
-                    if (!Enabled) return;
-
-                    var elements = s.AllFeatures
-                        .OfType<BlueprintProgression>();
-
-                    var blastSelections = elements.Select(p =>
-                        (p, p.LevelEntries
-                            .Where(e => e.Level == 1)
-                            .SelectMany(e => e.Features.OfType<BlueprintFeatureSelection>())));
-
-                    foreach (var (progression, selection) in blastSelections)
+                    if (Enabled)
                     {
-                        if (!selection.Any()) continue;
+                        var elements = s.AllFeatures
+                            .OfType<BlueprintProgression>();
 
-                        MicroLogger.Debug(() => $"Patching {progression.name}");
+                        var blastSelections = elements.Select(p =>
+                            (p, p.LevelEntries
+                                .Where(e => e.Level == 1)
+                                .SelectMany(e => e.Features.OfType<BlueprintFeatureSelection>())));
 
-                        var blastFeatures = selection
-                            .First().AllFeatures
-                                .OfType<BlueprintProgression>()
-                                .Select(p => p.LevelEntries[0].Features.FirstOrDefault())
-                                .Where(f => f is not null);
-
-                        foreach (var f in blastFeatures.OfType<BlueprintFeature>())
+                        foreach (var (progression, selection) in blastSelections)
                         {
-                            var weakBlast = CreateWeakBlast(f);
+                            if (!selection.Any()) continue;
 
-                            MicroLogger.Debug(() => $"Adding {weakBlast?.name ?? "<null>"}");
+                            MicroLogger.Debug(() => $"Patching {progression.name}");
 
-                            if (weakBlast is null) continue;
+                            var blastFeatures = selection
+                                .First().AllFeatures
+                                    .OfType<BlueprintProgression>()
+                                    .Select(p => p.LevelEntries[0].Features.FirstOrDefault())
+                                    .Where(f => f is not null);
 
-                            ResourcesLibrary.BlueprintsCache.AddCachedBlueprint(weakBlast.AssetGuid, weakBlast);
-
-                            progression.AddAddFeatureIfHasFact(c =>
+                            foreach (var f in blastFeatures.OfType<BlueprintFeature>())
                             {
-                                c.m_CheckedFact = c.m_Feature = weakBlast.ToReference<BlueprintUnitFactReference>();
-                                c.Not = true;
-                            });
+                                var weakBlast = CreateWeakBlast(f);
 
-                            f.AddRemoveFeatureOnApply(c => c.m_Feature = weakBlast.ToReference<BlueprintUnitFactReference>());
+                                MicroLogger.Debug(() => $"Adding {weakBlast?.name ?? "<null>"}");
+
+                                if (weakBlast is null) continue;
+
+                                ResourcesLibrary.BlueprintsCache.AddCachedBlueprint(weakBlast.AssetGuid, weakBlast);
+
+                                progression.AddAddFeatureIfHasFact(c =>
+                                {
+                                    c.m_CheckedFact = c.m_Feature = weakBlast.ToReference<BlueprintUnitFactReference>();
+                                    c.Not = true;
+                                });
+
+                                f.AddRemoveFeatureOnApply(c => c.m_Feature = weakBlast.ToReference<BlueprintUnitFactReference>());
+                            }
                         }
                     }
+
+                    return s;
                 })
-                .Register();
+                .RegisterBlueprint(BlueprintsDb.Owlcat.BlueprintFeatureSelection.ElementalFocusSelection_1f3a15a3ae8a5524ab8b97f469bf4e3d.BlueprintGuid);
         }
     }
 }

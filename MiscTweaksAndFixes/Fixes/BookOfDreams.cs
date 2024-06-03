@@ -21,8 +21,11 @@ using MicroWrath.Constructors;
 using MicroWrath.Extensions;
 using MicroWrath.Extensions.Components;
 using MicroWrath.Internal.InitContext;
+using MicroWrath.Util;
 
 using MiscTweaksAndFixes.AddedContent;
+
+using UniRx;
 
 namespace MiscTweaksAndFixes.Fixes
 {
@@ -31,8 +34,6 @@ namespace MiscTweaksAndFixes.Fixes
         public const string BookOfDreamsItemConvert_v2 = "8ea9114c683e4f218af674575aefcd57";
 
         internal static bool Enabled = false;
-
-        //private static readonly BlueprintInitializationContext PatchContext = new(Triggers.BlueprintsCache_Init);
 
         private class EtudesUpdateEventHandler(Action action) : IEtudesUpdateHandler
         {
@@ -44,57 +45,16 @@ namespace MiscTweaksAndFixes.Fixes
         [Init]
         internal static void Init()
         {
-            //PatchContext.GetBlueprint(new MicroBlueprint<BlueprintPlayerUpgrader>(BookOfDreamsItemConvert_v2))
-            //    .Map(bp =>
-            //    {
-            //        if (!Enabled) return;
-
-            //        MicroLogger.Debug(() => $"{nameof(BookOfDreams)}");
-
-            //        EventBus.Subscribe(new EtudesUpdateEventHandler(() => {
-            //            MicroLogger.Debug(() => "Running Book of Dreams updater");
-            //            bp!.m_Actions.Run();
-            //        }));
-            //    })
-            //    .Register();
-
-            InitContext.GetBlueprint(new MicroBlueprint<BlueprintPlayerUpgrader>(BookOfDreamsItemConvert_v2))
-                .Map(maybeBp => maybeBp.MaybeValue!)
-                .Map(bp =>
+            var bp = new OwlcatBlueprint<BlueprintPlayerUpgrader>(BookOfDreamsItemConvert_v2);
+            EventBus.Subscribe(new EtudesUpdateEventHandler(() =>
+            {
+                if (Enabled)
                 {
-                    if (!Enabled) return bp;
-
-                    MicroLogger.Debug(() => $"{nameof(BookOfDreams)}");
-
-                    EventBus.Subscribe(new EtudesUpdateEventHandler(() =>
-                    {
-                        MicroLogger.Debug(() => "Running Book of Dreams updater");
-                        bp!.m_Actions.Run();
-                    }));
-
-                    return bp;
-                })
-                .RegisterBlueprint(BlueprintGuid.Parse(BookOfDreamsItemConvert_v2));
-            
-            //PatchContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.BooksOfDreamsIStageFeature)
-            //    .Map((BlueprintFeature bp) =>
-            //    {
-            //        bp.Components = [];
-            //        bp.AddComponent<ExtraSummonCount>();
-            //    })
-            //    .Register();
-
-            InitContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.BooksOfDreamsIStageFeature)
-                .Map((BlueprintFeature bp) =>
-                {
-                    if (!Enabled) return bp;
-
-                    bp.Components = [];
-                    bp.AddComponent<ExtraSummonCount>();
-
-                    return bp;
-                })
-                .RegisterBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.BooksOfDreamsIStageFeature.BlueprintGuid);
+                    MicroLogger.Debug(() => "Running Book of Dreams updater");
+                    
+                    bp.TryGetBlueprint().Map(bp => { bp.m_Actions.Run(); return Unit.Default; });
+                }
+            }));
         }
     }
 }

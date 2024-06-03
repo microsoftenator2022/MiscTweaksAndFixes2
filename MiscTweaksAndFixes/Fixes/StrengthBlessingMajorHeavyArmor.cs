@@ -11,8 +11,8 @@ using Kingmaker.UnitLogic.Buffs.Blueprints;
 
 using MicroWrath;
 using MicroWrath.BlueprintsDb;
-using MicroWrath.BlueprintInitializationContext;
 using MicroWrath.Extensions;
+using MicroWrath.Internal.InitContext;
 
 namespace MiscTweaksAndFixes.Fixes
 {
@@ -20,7 +20,7 @@ namespace MiscTweaksAndFixes.Fixes
     {
         internal static bool Enabled = true;
 
-        private static readonly BlueprintInitializationContext PatchContext = new(Triggers.BlueprintsCache_Init);
+        //private static readonly BlueprintInitializationContext PatchContext = new(Triggers.BlueprintsCache_Init);
 
         [AllowMultipleComponents]
         [AllowedOn(typeof(BlueprintBuff), false)]
@@ -44,17 +44,33 @@ namespace MiscTweaksAndFixes.Fixes
         [Init]
         public static void Init()
         {
-            PatchContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintBuff.StrengthBlessingMajorBuff)
-                .Map((BlueprintBuff bp) =>
+            //var context = 
+            InitContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintBuff.StrengthBlessingMajorBuff)
+                .Map(buff =>
                 {
-                    if (!Enabled) return;
+                    if (Enabled)
+                    {
+                        MicroLogger.Debug(() => $"{nameof(StrengthBlessingMajorHeavyArmor)}");
 
-                    MicroLogger.Debug(() => $"{nameof(StrengthBlessingMajorHeavyArmor)}");
+                        buff.RemoveComponents(c => c is ArmorSpeedPenaltyRemoval);
+                        buff.AddComponent<HeavyArmorSpeedPenaltyRemoval>();
+                    }
 
-                    bp.RemoveComponents(c => c is ArmorSpeedPenaltyRemoval);
-                    bp.AddComponent<HeavyArmorSpeedPenaltyRemoval>();
+                    return buff;
                 })
-                .Register();
+                .RegisterBlueprint(BlueprintsDb.Owlcat.BlueprintBuff.StrengthBlessingMajorBuff.BlueprintGuid);
+
+            //PatchContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintBuff.StrengthBlessingMajorBuff)
+            //    .Map((BlueprintBuff bp) =>
+            //    {
+            //        if (!Enabled) return;
+
+            //        MicroLogger.Debug(() => $"{nameof(StrengthBlessingMajorHeavyArmor)}");
+
+            //        bp.RemoveComponents(c => c is ArmorSpeedPenaltyRemoval);
+            //        bp.AddComponent<HeavyArmorSpeedPenaltyRemoval>();
+            //    })
+            //    .Register();
         }
     }
 }

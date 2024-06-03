@@ -21,10 +21,11 @@ using Kingmaker.UnitLogic.Buffs.Blueprints;
 using Kingmaker.UnitLogic.FactLogic;
 
 using MicroWrath;
-using MicroWrath.BlueprintInitializationContext;
+//using MicroWrath.BlueprintInitializationContext;
 using MicroWrath.BlueprintsDb;
 using MicroWrath.Extensions;
 using MicroWrath.Extensions.Components;
+using MicroWrath.Internal.InitContext;
 using MicroWrath.Util;
 using MicroWrath.Util.Linq;
 
@@ -715,9 +716,9 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
         [Init]
         internal static void CreateEnchant()
         {
-            var bic = new BlueprintInitializationContext(Triggers.BlueprintsCache_Init);
+            //var bic = new BlueprintInitializationContext(Triggers.BlueprintsCache_Init);
 
-            var buff = bic.NewBlueprint<BlueprintBuff>("03ABBCCA-C01C-4057-A183-9CB20B3D4C8C", "RipAndTearBuff")
+            var buff = InitContext.NewBlueprint<BlueprintBuff>("03ABBCCA-C01C-4057-A183-9CB20B3D4C8C", "RipAndTearBuff")
                 .Map(buff =>
                 {
                     buff.AddComponent<DoomGuyFaceOverlay>();
@@ -725,9 +726,10 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                     buff.m_Flags = BlueprintBuff.Flags.HiddenInUi;
 
                     return buff;
-                });
+                })
+                .RegisterBlueprint(BlueprintGuid.Parse("03ABBCCA-C01C-4057-A183-9CB20B3D4C8C"));
 
-            var feature = bic.NewBlueprint<BlueprintFeature>("563B8476-B1FE-4314-8D1C-C567FEA0F537", "RipAndTearFeature")
+            var feature = InitContext.NewBlueprint<BlueprintFeature>("563B8476-B1FE-4314-8D1C-C567FEA0F537", "RipAndTearFeature")
                 .Combine(buff)
                 .Map(fb =>
                 {
@@ -741,9 +743,10 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                     });
 
                     return feature;
-                });
+                })
+                .RegisterBlueprint(BlueprintGuid.Parse("563B8476-B1FE-4314-8D1C-C567FEA0F537"));
 
-            var enchant = bic.NewBlueprint<BlueprintEquipmentEnchantment>("89BF4CDB-9C4D-462E-8271-86FA30B20B33", "RipAndTearEnchant")
+            var enchant = InitContext.NewBlueprint<BlueprintEquipmentEnchantment>("89BF4CDB-9C4D-462E-8271-86FA30B20B33", "RipAndTearEnchant")
                 .Combine(feature)
                 .Map(ef =>
                 {
@@ -757,17 +760,20 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                     }
 
                     return enchant;
-                });
+                })
+                .RegisterBlueprint(BlueprintGuid.Parse("89BF4CDB-9C4D-462E-8271-86FA30B20B33"));
 
-            bic.GetBlueprint(BlueprintsDb.Owlcat.BlueprintItemEquipmentHead.KillerHelm_easterEgg)
+            InitContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintItemEquipmentHead.KillerHelm_easterEgg)
                 .Combine(enchant)
                 .Map(ie =>
                 {
                     var (item, enchant) = ie;
                     
                     if (enabled) item.Enchantments.Add(enchant);
+
+                    return item;
                 })
-                .Register();
+                .RegisterBlueprint(BlueprintGuid.Parse("89BF4CDB-9C4D-462E-8271-86FA30B20B33"));
         }
     }
 }
