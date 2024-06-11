@@ -1,15 +1,15 @@
 using Kingmaker.Blueprints.Classes;
+using Kingmaker.UnitLogic.FactLogic;
 
 using MicroWrath;
 using MicroWrath.BlueprintsDb;
-using MicroWrath.Internal.InitContext;
+using MicroWrath.InitContext;
 using MicroWrath.Extensions;
 using MicroWrath.Extensions.Components;
 using MicroWrath.Localization;
+using MicroWrath.Util;
 
 using MiscTweaksAndFixes.AddedContent;
-using MicroWrath.Util;
-using Kingmaker.UnitLogic.FactLogic;
 
 namespace MiscTweaksAndFixes.Tweaks.MythicSuperiorSummoning
 {
@@ -49,7 +49,7 @@ namespace MiscTweaksAndFixes.Tweaks.MythicSuperiorSummoning
 
                         return bp;
                     })
-                    .RegisterBlueprint(GeneratedGuid.MythicSuperiorSummoning);
+                    .RegisterBlueprint(GeneratedGuid.MythicSuperiorSummoning, Triggers.BlueprintsCache_Init);
 
             InitContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeatureSelection.MythicFeatSelection)
                 .Combine(bp)
@@ -62,7 +62,9 @@ namespace MiscTweaksAndFixes.Tweaks.MythicSuperiorSummoning
 
                     return selection;
                 })
-                .RegisterBlueprint(BlueprintsDb.Owlcat.BlueprintFeatureSelection.MythicFeatSelection.BlueprintGuid);
+                .RegisterBlueprint(
+                    BlueprintsDb.Owlcat.BlueprintFeatureSelection.MythicFeatSelection.BlueprintGuid,
+                    Triggers.BlueprintsCache_Init);
         }
     }
 }

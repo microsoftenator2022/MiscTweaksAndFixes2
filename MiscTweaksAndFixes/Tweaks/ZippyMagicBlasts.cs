@@ -20,7 +20,7 @@ using MicroWrath;
 using MicroWrath.BlueprintsDb;
 using MicroWrath.Extensions;
 using MicroWrath.Extensions.Components;
-using MicroWrath.Internal.InitContext;
+using MicroWrath.InitContext;
 
 namespace MiscTweaksAndFixes.Tweaks
 {
@@ -80,7 +80,9 @@ namespace MiscTweaksAndFixes.Tweaks
 
                     return feature;
                 })
-                .RegisterBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.ZippyMagicFeature.BlueprintGuid);
+                .RegisterBlueprint(
+                    BlueprintsDb.Owlcat.BlueprintFeature.ZippyMagicFeature.BlueprintGuid,
+                    Triggers.BlueprintsCache_Init);
         }
     }
 }

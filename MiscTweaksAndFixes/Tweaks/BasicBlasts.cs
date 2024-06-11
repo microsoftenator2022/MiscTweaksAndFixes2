@@ -20,7 +20,7 @@ using MicroWrath.BlueprintsDb;
 //using MicroWrath.BlueprintInitializationContext;
 using MicroWrath.Extensions;
 using MicroWrath.Extensions.Components;
-using MicroWrath.Internal.InitContext;
+using MicroWrath.InitContext;
 using MicroWrath.Util;
 using MicroWrath.Util.Linq;
 
@@ -136,7 +136,9 @@ namespace MiscTweaksAndFixes.Tweaks
 
                     return s;
                 })
-                .RegisterBlueprint(BlueprintsDb.Owlcat.BlueprintFeatureSelection.ElementalFocusSelection_1f3a15a3ae8a5524ab8b97f469bf4e3d.BlueprintGuid);
+                .RegisterBlueprint(
+                    BlueprintsDb.Owlcat.BlueprintFeatureSelection.ElementalFocusSelection_1f3a15a3ae8a5524ab8b97f469bf4e3d.BlueprintGuid,
+                    Triggers.BlueprintsCache_Init);
         }
     }
 }

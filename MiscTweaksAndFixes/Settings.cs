@@ -104,8 +104,8 @@ namespace MiscTweaksAndFixes
             CreateSettingToggle(
                 nameof(BookOfDreams),
                 defaultValue: true,
-                description: LocalizedStrings.Settings_BookOfDreamsToggleDescription,
-                longDescription: LocalizedStrings.Settings_BookOfDreamsToggleLongDescription,
+                description: Localized.BookOfDreamsToggleDescription,
+                longDescription: Localized.BookOfDreamsToggleLongDescription,
                 onChanged: value => BookOfDreams.Enabled = value);
 
         [LocalizedString]
@@ -119,8 +119,8 @@ namespace MiscTweaksAndFixes
             CreateSettingToggle(
                 nameof(ReformedFiendDRGood),
                 defaultValue: false,
-                description: LocalizedStrings.Settings_ReformedFiendDRToggleDescription,
-                longDescription: LocalizedStrings.Settings_ReformedFiendDRToggleLongDescription,
+                description: Localized.ReformedFiendDRToggleDescription,
+                longDescription: Localized.ReformedFiendDRToggleLongDescription,
                 onChanged: value => ReformedFiendDRGood.Enabled = value);
 
         [LocalizedString]
@@ -134,8 +134,8 @@ namespace MiscTweaksAndFixes
             CreateSettingToggle(
                 nameof(StrengthBlessingMajorHeavyArmor),
                 defaultValue: true,
-                description: LocalizedStrings.Settings_StrengthBlessingFixToggleDescription,
-                longDescription: LocalizedStrings.Settings_StrengthBlessingFixToggleLongDescription,
+                description: Localized.StrengthBlessingFixToggleDescription,
+                longDescription: Localized.StrengthBlessingFixToggleLongDescription,
                 onChanged: value => StrengthBlessingMajorHeavyArmor.Enabled = value);
 
         [LocalizedString]
@@ -144,7 +144,7 @@ namespace MiscTweaksAndFixes
             CreateSettingToggle(
                 nameof(DebugLogging),
                 defaultValue: false,
-                description: LocalizedStrings.Settings_DebugLoggingDescription,
+                description: Localized.DebugLoggingDescription,
                 onChanged: value => DebugLogging = value)
             .OnValueChanged(newValue => DebugLogging = newValue);
 
@@ -165,8 +165,8 @@ namespace MiscTweaksAndFixes
             CreateSettingToggle(
                 nameof(NaturalWeaponStacking),
                 defaultValue: true,
-                description: LocalizedStrings.Settings_NaturalWeaponStackingDescription,
-                longDescription: LocalizedStrings.Settings_NaturalWeaponStackingLongDescription,
+                description: Localized.NaturalWeaponStackingDescription,
+                longDescription: Localized.NaturalWeaponStackingLongDescription,
                 onChanged: value => NaturalWeaponStacking.Enabled = value);
 
         [LocalizedString]
@@ -175,7 +175,7 @@ namespace MiscTweaksAndFixes
             CreateSettingToggle(
                 nameof(DollRoomFilters.ColorAdjustmentsFilter),
                 defaultValue: false,
-                description: LocalizedStrings.Settings_DollRoomColorAdjustmentsFilterToggleDescription,
+                description: Localized.DollRoomColorAdjustmentsFilterToggleDescription,
                 onChanged: value => DollRoomFilters.ColorAdjustmentsFilter = value);
 
         [LocalizedString]
@@ -184,7 +184,7 @@ namespace MiscTweaksAndFixes
             CreateSettingToggle(
                 nameof(DollRoomFilters.SlopePowerOffsetFilter),
                 defaultValue: true,
-                description: LocalizedStrings.Settings_DollRoomSlopePowerOffsetFilterToggleDescription,
+                description: Localized.DollRoomSlopePowerOffsetFilterToggleDescription,
                 onChanged: value => DollRoomFilters.SlopePowerOffsetFilter = value);
 
         [LocalizedString]
@@ -197,8 +197,8 @@ namespace MiscTweaksAndFixes
             CreateSettingToggle(
                 nameof(RipAndTear),
                 defaultValue: true,
-                description: LocalizedStrings.Settings_RipAndTearDescription,
-                longDescription: LocalizedStrings.Settings_RipAndTearLongDescription,
+                description: Localized.RipAndTearDescription,
+                longDescription: Localized.RipAndTearLongDescription,
                 onChanged: value => RipAndTear.Enabled = value);
 
         [LocalizedString]
@@ -223,8 +223,8 @@ namespace MiscTweaksAndFixes
             CreateSettingToggle(
                 nameof(IdentifyNaturalWeaponsToggle),
                 defaultValue: true,
-                description: LocalizedStrings.Settings_IdentifyNaturalWeaponsDescription,
-                longDescription: LocalizedStrings.Settings_IdentifyNaturalWeaponsLongDescription,
+                description: Localized.IdentifyNaturalWeaponsDescription,
+                longDescription: Localized.IdentifyNaturalWeaponsLongDescription,
                 onChanged: value => NaturalWeapons.IdentifyNaturalWeapons = value);
 
         [LocalizedString]
@@ -240,8 +240,8 @@ namespace MiscTweaksAndFixes
             CreateSettingToggle(
                 nameof(EquipBestEmptyHandWeaponToggle),
                 defaultValue: true,
-                description: LocalizedStrings.Settings_EquipBestEmptyHandWeaponDescription,
-                longDescription: LocalizedStrings.Settings_EquipBestEmptyHandWeaponLongDescription,
+                description: Localized.EquipBestEmptyHandWeaponDescription,
+                longDescription: Localized.EquipBestEmptyHandWeaponLongDescription,
                 onChanged: value => NaturalWeapons.EquipBestEmptyHandWeapon = value);
 
         [LocalizedString]
@@ -252,8 +252,8 @@ namespace MiscTweaksAndFixes
         private static Toggle ZippyMagicBlastsToggle =>
             CreateSettingToggle(nameof(ZippyMagicBlastsToggle),
                 defaultValue: false,
-                description: LocalizedStrings.Settings_ZippyMagicBlastsDescription,
-                longDescription: LocalizedStrings.Settings_ZippyMagicBlastsLongDescription,
+                description: Localized.ZippyMagicBlastsDescription,
+                longDescription: Localized.ZippyMagicBlastsLongDescription,
                 onChanged: value => ZippyMagicBlasts.Enabled = value);
 
         [LocalizedString]
@@ -268,8 +268,8 @@ namespace MiscTweaksAndFixes
             CreateSettingToggle(
                 nameof(BasicBlastsToggle),
                 defaultValue: false,
-                description: LocalizedStrings.Settings_BasicBlastsDescription,
-                longDescription: LocalizedStrings.Settings_BasicBlastsLongDescription,
+                description: Localized.BasicBlastsDescription,
+                longDescription: Localized.BasicBlastsLongDescription,
                 onChanged: value => BasicBlasts.Enabled = value);
 
         [LocalizedString]

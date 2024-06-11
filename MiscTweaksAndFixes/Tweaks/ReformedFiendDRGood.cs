@@ -15,7 +15,7 @@ using MicroWrath;
 using MicroWrath.BlueprintsDb;
 //using MicroWrath.BlueprintInitializationContext;
 using MicroWrath.Constructors;
-using MicroWrath.Internal.InitContext;
+using MicroWrath.InitContext;
 using MicroWrath.Util;
 
 using UniRx;
@@ -65,7 +65,9 @@ namespace MiscTweaksAndFixes.Tweaks
 
                     return bp;
                 })
-                .RegisterBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.ReformedFiendDamageReductionFeature.BlueprintGuid);
+                .RegisterBlueprint(
+                    BlueprintsDb.Owlcat.BlueprintFeature.ReformedFiendDamageReductionFeature.BlueprintGuid,
+                    Triggers.BlueprintsCache_Init);
         }
     }
 }

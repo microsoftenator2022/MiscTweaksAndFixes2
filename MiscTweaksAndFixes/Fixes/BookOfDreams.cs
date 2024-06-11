@@ -4,26 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using HarmonyLib;
-
-using Kingmaker.Blueprints;
-using Kingmaker.Blueprints.Classes;
-using Kingmaker.Blueprints.JsonSystem;
-using Kingmaker.EntitySystem.Entities;
 using Kingmaker.EntitySystem.Persistence.Versioning;
 using Kingmaker.PubSubSystem;
-using Kingmaker.UnitLogic.FactLogic;
 
 using MicroWrath;
 using MicroWrath.BlueprintInitializationContext;
-using MicroWrath.BlueprintsDb;
-using MicroWrath.Constructors;
-using MicroWrath.Extensions;
-using MicroWrath.Extensions.Components;
-using MicroWrath.Internal.InitContext;
 using MicroWrath.Util;
-
-using MiscTweaksAndFixes.AddedContent;
 
 using UniRx;
 

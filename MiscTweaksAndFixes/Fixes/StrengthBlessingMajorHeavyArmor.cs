@@ -11,8 +11,9 @@ using Kingmaker.UnitLogic.Buffs.Blueprints;
 
 using MicroWrath;
 using MicroWrath.BlueprintsDb;
+//using MicroWrath.BlueprintInitializationContext;
 using MicroWrath.Extensions;
-using MicroWrath.Internal.InitContext;
+using MicroWrath.InitContext;
 
 namespace MiscTweaksAndFixes.Fixes
 {
@@ -58,7 +59,7 @@ namespace MiscTweaksAndFixes.Fixes
 
                     return buff;
                 })
-                .RegisterBlueprint(BlueprintsDb.Owlcat.BlueprintBuff.StrengthBlessingMajorBuff.BlueprintGuid);
+                .RegisterBlueprint(BlueprintsDb.Owlcat.BlueprintBuff.StrengthBlessingMajorBuff.BlueprintGuid, Triggers.BlueprintsCache_Init);
 
             //PatchContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintBuff.StrengthBlessingMajorBuff)
             //    .Map((BlueprintBuff bp) =>

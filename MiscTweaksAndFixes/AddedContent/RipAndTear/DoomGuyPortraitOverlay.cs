@@ -25,7 +25,7 @@ using MicroWrath;
 using MicroWrath.BlueprintsDb;
 using MicroWrath.Extensions;
 using MicroWrath.Extensions.Components;
-using MicroWrath.Internal.InitContext;
+using MicroWrath.InitContext;
 using MicroWrath.Util;
 using MicroWrath.Util.Linq;
 
@@ -727,7 +727,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
 
                     return buff;
                 })
-                .RegisterBlueprint(BlueprintGuid.Parse("03ABBCCA-C01C-4057-A183-9CB20B3D4C8C"));
+                .RegisterBlueprint(BlueprintGuid.Parse("03ABBCCA-C01C-4057-A183-9CB20B3D4C8C"), Triggers.BlueprintsCache_Init);
 
             var feature = InitContext.NewBlueprint<BlueprintFeature>("563B8476-B1FE-4314-8D1C-C567FEA0F537", "RipAndTearFeature")
                 .Combine(buff)
@@ -744,7 +744,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
 
                     return feature;
                 })
-                .RegisterBlueprint(BlueprintGuid.Parse("563B8476-B1FE-4314-8D1C-C567FEA0F537"));
+                .RegisterBlueprint(BlueprintGuid.Parse("563B8476-B1FE-4314-8D1C-C567FEA0F537"), Triggers.BlueprintsCache_Init);
 
             var enchant = InitContext.NewBlueprint<BlueprintEquipmentEnchantment>("89BF4CDB-9C4D-462E-8271-86FA30B20B33", "RipAndTearEnchant")
                 .Combine(feature)
@@ -761,7 +761,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
 
                     return enchant;
                 })
-                .RegisterBlueprint(BlueprintGuid.Parse("89BF4CDB-9C4D-462E-8271-86FA30B20B33"));
+                .RegisterBlueprint(BlueprintGuid.Parse("89BF4CDB-9C4D-462E-8271-86FA30B20B33"), Triggers.BlueprintsCache_Init);
 
             InitContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintItemEquipmentHead.KillerHelm_easterEgg)
                 .Combine(enchant)
@@ -773,7 +773,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
 
                     return item;
                 })
-                .RegisterBlueprint(BlueprintGuid.Parse("89BF4CDB-9C4D-462E-8271-86FA30B20B33"));
+                .RegisterBlueprint(BlueprintGuid.Parse("89BF4CDB-9C4D-462E-8271-86FA30B20B33"), Triggers.BlueprintsCache_Init);
         }
     }
 }
