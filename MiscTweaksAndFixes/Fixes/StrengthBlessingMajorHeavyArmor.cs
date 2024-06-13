@@ -59,7 +59,7 @@ namespace MiscTweaksAndFixes.Fixes
 
                     return buff;
                 })
-                .RegisterBlueprint(BlueprintsDb.Owlcat.BlueprintBuff.StrengthBlessingMajorBuff.BlueprintGuid, Triggers.BlueprintsCache_Init);
+                .AddOnTrigger(BlueprintsDb.Owlcat.BlueprintBuff.StrengthBlessingMajorBuff.BlueprintGuid, Triggers.BlueprintsCache_Init);
 
             //PatchContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintBuff.StrengthBlessingMajorBuff)
             //    .Map((BlueprintBuff bp) =>

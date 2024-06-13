@@ -86,10 +86,8 @@ namespace MiscTweaksAndFixes.Tweaks
         [Init]
         internal static void Init()
         {
-            //var initContext = new BlueprintInitializationContext(Triggers.BlueprintsCache_Init);
-
-            //initContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeatureSelection.ElementalFocusSelection_1f3a15a3ae8a5524ab8b97f469bf4e3d)
-            InitContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeatureSelection.ElementalFocusSelection_1f3a15a3ae8a5524ab8b97f469bf4e3d)
+            var kineticistElementalFocusSelection = BlueprintsDb.Owlcat.BlueprintFeatureSelection.ElementalFocusSelection_1f3a15a3ae8a5524ab8b97f469bf4e3d;
+            InitContext.GetBlueprint(kineticistElementalFocusSelection)
                 .Map((BlueprintFeatureSelection s) => {
                     if (Enabled)
                     {
@@ -136,8 +134,8 @@ namespace MiscTweaksAndFixes.Tweaks
 
                     return s;
                 })
-                .RegisterBlueprint(
-                    BlueprintsDb.Owlcat.BlueprintFeatureSelection.ElementalFocusSelection_1f3a15a3ae8a5524ab8b97f469bf4e3d.BlueprintGuid,
+                .AddOnTrigger(
+                    kineticistElementalFocusSelection.BlueprintGuid,
                     Triggers.BlueprintsCache_Init);
         }
     }

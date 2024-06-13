@@ -49,7 +49,7 @@ namespace MiscTweaksAndFixes.Tweaks.MythicSuperiorSummoning
 
                         return bp;
                     })
-                    .RegisterBlueprint(GeneratedGuid.MythicSuperiorSummoning, Triggers.BlueprintsCache_Init);
+                    .AddOnTrigger(GeneratedGuid.MythicSuperiorSummoning, Triggers.BlueprintsCache_Init);
 
             InitContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeatureSelection.MythicFeatSelection)
                 .Combine(bp)
@@ -62,7 +62,7 @@ namespace MiscTweaksAndFixes.Tweaks.MythicSuperiorSummoning
 
                     return selection;
                 })
-                .RegisterBlueprint(
+                .AddOnTrigger(
                     BlueprintsDb.Owlcat.BlueprintFeatureSelection.MythicFeatSelection.BlueprintGuid,
                     Triggers.BlueprintsCache_Init);
         }

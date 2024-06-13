@@ -80,7 +80,7 @@ namespace MiscTweaksAndFixes.Tweaks
 
                     return feature;
                 })
-                .RegisterBlueprint(
+                .AddOnTrigger(
                     BlueprintsDb.Owlcat.BlueprintFeature.ZippyMagicFeature.BlueprintGuid,
                     Triggers.BlueprintsCache_Init);
         }

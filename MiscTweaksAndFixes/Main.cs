@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if false
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,30 +9,47 @@ using System.Threading.Tasks;
 
 using HarmonyLib;
 
+using Kingmaker.Blueprints;
+using Kingmaker.Blueprints.JsonSystem;
 using Kingmaker.Blueprints.JsonSystem.Converters;
 using Kingmaker.SharedTypes;
+
+using MicroWrath;
+using MicroWrath.BlueprintsDb;
 
 using UniRx;
 
 namespace MiscTweaksAndFixes
 {
+    [HarmonyPatch]
+    static class TestPatch
+    {
+        [HarmonyReversePatch]
+        [HarmonyPatch(typeof(BlueprintsCache), nameof(BlueprintsCache.Load))]
+        public static SimpleBlueprint LoadBlueprint(BlueprintsCache instance, BlueprintGuid guid) => throw new NotImplementedException("STUB");
+    }
+
     internal partial class Main
     {
-        //[Init]
-        //internal static void Init()
-        //{
-        //    IDisposable? subscription = null;
+        [Init]
+        static void Init()
+        {
+            Triggers.BlueprintsCache_Init.Take(1).Subscribe(_ =>
+            {
+                MicroLogger.Debug(() => $"TEST BLUEPRINT GET");
 
-        //    subscription = Triggers.BlueprintsCache_Init.Take(1).Subscribe(_ =>
-        //    {
-        //        var assets = UnityObjectConverter.AssetList.m_Entries
-        //            .GroupBy(entry => entry.FileId)
-        //            .Select(group => (group.Key, group.GroupBy(entry => entry.Asset.GetType())));
+                try
+                {
+                    var blueprint = TestPatch.LoadBlueprint(ResourcesLibrary.BlueprintsCache, BlueprintsDb.Owlcat.BlueprintRace.HumanRace.BlueprintGuid);
 
-
-
-        //        subscription?.Dispose();
-        //    });
-        //}
+                    MicroLogger.Debug(() => $"{blueprint}");
+                }
+                catch (Exception ex)
+                {
+                    MicroLogger.Error("Exception!", ex);
+                }
+            });
+        }
     }
 }
+#endif

@@ -65,7 +65,7 @@ namespace MiscTweaksAndFixes.Tweaks
 
                     return bp;
                 })
-                .RegisterBlueprint(
+                .AddOnTrigger(
                     BlueprintsDb.Owlcat.BlueprintFeature.ReformedFiendDamageReductionFeature.BlueprintGuid,
                     Triggers.BlueprintsCache_Init);
         }
