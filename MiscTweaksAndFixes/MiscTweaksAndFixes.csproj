@@ -21,10 +21,10 @@
 
   <ItemGroup>
     <PackageReference Include="AssemblyPublicizer" Version="1.0.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>none</PrivateAssets>
+      <IncludeAssets>build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="MicroWrath" Version="0.8.4-*" />
+    <PackageReference Include="MicroWrath" Version="0.8.6-*" />
   </ItemGroup>
 
   <ItemGroup>
@@ -64,7 +64,11 @@
   </ItemGroup>
 
   <Target Name="GenerateGuidsFileTarget" AfterTargets="Build">
-    <GenerateGuidsFile WrathPath="$(WrathPath)" Assembly="$(OutDir)\$(MSBuildProjectName).dll" GuidsFile="guids.json" />
+    <GenerateGuidsFile
+      WrathPath="$(WrathPath)"
+      Assembly="$(OutDir)\$(MSBuildProjectName).dll"
+      GuidsFile="guids.json"
+      References="@(ReferencePath)"/>
   </Target>
   
   <Target Name="Deploy" AfterTargets="Build">

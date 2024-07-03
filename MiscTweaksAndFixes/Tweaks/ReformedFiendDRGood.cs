@@ -15,7 +15,7 @@ using MicroWrath;
 using MicroWrath.BlueprintsDb;
 //using MicroWrath.BlueprintInitializationContext;
 using MicroWrath.Constructors;
-using MicroWrath.InitContext;
+using MicroWrath.Deferred;
 using MicroWrath.Util;
 
 using UniRx;
@@ -31,7 +31,7 @@ namespace MiscTweaksAndFixes.Tweaks
         [Init]
         public static void Init()
         {
-            InitContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.ReformedFiendDamageReductionFeature)
+            _ = Deferred.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.ReformedFiendDamageReductionFeature)
                 .Map(bp =>
                 {
                     if (!Enabled) return bp;

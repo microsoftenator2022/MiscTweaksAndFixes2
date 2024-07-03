@@ -20,7 +20,7 @@ using MicroWrath;
 using MicroWrath.BlueprintsDb;
 using MicroWrath.Extensions;
 using MicroWrath.Extensions.Components;
-using MicroWrath.InitContext;
+using MicroWrath.Deferred;
 
 namespace MiscTweaksAndFixes.Tweaks
 {
@@ -35,7 +35,7 @@ namespace MiscTweaksAndFixes.Tweaks
             UnitFactComponentDelegate,
             IInitiatorRulebookHandler<RuleCastSpell>
         {
-            private DublicateSpellComponent? Dsc => Fact.Components.OfType<DublicateSpellComponent>().FirstOrDefault();
+            private DublicateSpellComponent? Dsc => this.Fact.Components.OfType<DublicateSpellComponent>().FirstOrDefault();
 
             public void OnEventAboutToTrigger(RuleCastSpell _) { }
             public void OnEventDidTrigger(RuleCastSpell evt)
@@ -71,7 +71,7 @@ namespace MiscTweaksAndFixes.Tweaks
         {
             //var initContext = new BlueprintInitializationContext(Triggers.BlueprintsCache_Init);
 
-            InitContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.ZippyMagicFeature)
+            Deferred.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeature.ZippyMagicFeature)
                 .Map(feature =>
                 {
                     if (!Enabled) return feature;
