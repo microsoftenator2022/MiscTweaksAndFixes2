@@ -47,7 +47,8 @@ public class WeaponPrefabRotationConfig
     public Dictionary<UnitEquipmentVisualSlotType, Vector3> BeltModelRotations = [];
     public Dictionary<UnitEquipmentVisualSlotType, Vector3> SheathModelRotations = [];
     
-    public Vector3? HandRotation = null;
+    public bool UseHandRotation = false;
+    public Vector3 HandRotation = default;
 
     public AutoAlignType WeaponSheathAutoAlignment = AutoAlignType.SheathPriority;
 
@@ -107,6 +108,7 @@ internal static class WeaponPrefabOrientationFixes
         ExampleFalcata = new()
         {
             AssetId = "d26b2020e3ab8674cbf002c91b7d97a2",
+            UseHandRotation = true,
             HandRotation =  new(0, 90, 0)
         };
 
@@ -151,8 +153,16 @@ internal static class WeaponPrefabOrientationFixes
                         ExampleFalcataSheath
                     }, Formatting.Indented));
             }
+            try
+            {
+                configs = LoadConfigs(path);
+            }
+            catch(Exception ex)
+            {
+                MicroLogger.Error("Failed to read weapon prefab json", ex);
+            }
 
-            return configs = LoadConfigs(path);
+            return configs!;
         }
     }
 
@@ -226,10 +236,10 @@ internal static class WeaponPrefabOrientationFixes
         }
         else if (weaponConfig is not null && visualModel != null)
         {
-            if (visualModel.transform.parent == __instance.HandTransform && weaponConfig.HandRotation is { } handRotation)
+            if (visualModel.transform.parent == __instance.HandTransform && weaponConfig.UseHandRotation)
             {
-                MicroLogger.Debug(() => $"Setting hand rotation {handRotation}");
-                weaponRenderer.transform.localEulerAngles = handRotation;
+                MicroLogger.Debug(() => $"Setting hand rotation {weaponConfig.HandRotation}");
+                weaponRenderer.transform.localEulerAngles = weaponConfig.HandRotation;
             }
             else if (weaponConfig.WeaponSheathAutoAlignment != AutoAlignType.None && sheathRenderer != null)
             {

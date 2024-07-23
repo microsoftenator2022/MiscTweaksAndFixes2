@@ -305,7 +305,7 @@ namespace MiscTweaksAndFixes
         private static Toggle WeaponPrefabFixesEditModeToggle =>
             CreateSettingToggle(
                 nameof(WeaponPrefabFixesEditModeToggle),
-                defaultValue: false,
+                defaultValue: WeaponPrefabOrientationFixes.EditMode,
                 description: Localized.WeaponPrefabFixesEditModeToggleDescription,
                 onChanged: value => WeaponPrefabOrientationFixes.EditMode = value);
 
