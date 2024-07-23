@@ -34,6 +34,13 @@ public class WeaponPrefabRotationConfig
         BeltOverride
     }
 
+    public enum AutoAlignType
+    {
+        None,
+        WeaponPriority,
+        SheathPriority
+    }
+
     public string AssetId = "";
     public ConfigType Type = ConfigType.Weapon;
 
@@ -42,7 +49,7 @@ public class WeaponPrefabRotationConfig
     
     public Vector3? HandRotation = null;
 
-    public bool WeaponSheathAutoAlignment = true;
+    public AutoAlignType WeaponSheathAutoAlignment = AutoAlignType.SheathPriority;
 
     public override string ToString()
     {
@@ -71,9 +78,16 @@ public class WeaponPrefabRotationConfig
 }
 
 [HarmonyPatch]
-public static class WeaponPrefabOrientationFixes
+internal static class WeaponPrefabOrientationFixes
 {
-    static bool Enabled = true;
+    internal static bool Enabled = true;
+    internal static bool EditMode =
+#if DEBUG
+        true;
+#else
+        false;
+#endif
+
     static readonly WeaponPrefabRotationConfig ExampleFalcata;
     static readonly WeaponPrefabRotationConfig ExampleFalcataSheath;
 
@@ -88,7 +102,7 @@ public static class WeaponPrefabOrientationFixes
             UnitEquipmentVisualSlotType.LeftFront01
         }
         .Select(slot => (slot, new Vector3(0, 90, 0)))
-        .Append((UnitEquipmentVisualSlotType.LeftFront01, new Vector3(90, 90, 0)));
+        .Append((UnitEquipmentVisualSlotType.RightFront01, new Vector3(90, 90, 0)));
 
         ExampleFalcata = new()
         {
@@ -123,11 +137,9 @@ public static class WeaponPrefabOrientationFixes
     {
         get
         {
-#if !DEBUG
-            if (configs is not null)
-
+            if (configs is not null && !EditMode)
                 return configs;
-#endif
+
             var path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "WeaponRotationCorrections.json");
 
             if (!File.Exists(path))
@@ -219,9 +231,18 @@ public static class WeaponPrefabOrientationFixes
                 MicroLogger.Debug(() => $"Setting hand rotation {handRotation}");
                 weaponRenderer.transform.localEulerAngles = handRotation;
             }
-            else if (weaponConfig.WeaponSheathAutoAlignment && sheathRenderer != null)
+            else if (weaponConfig.WeaponSheathAutoAlignment != AutoAlignType.None && sheathRenderer != null)
             {
-                weaponRenderer.transform.localEulerAngles = sheathRenderer.transform.localEulerAngles;
+                switch (weaponConfig.WeaponSheathAutoAlignment)
+                {
+                    case AutoAlignType.SheathPriority:
+                        weaponRenderer.transform.localEulerAngles = sheathRenderer.transform.localEulerAngles;
+                        break;
+                    case AutoAlignType.WeaponPriority:
+                        weaponRenderer.transform.localEulerAngles = sheathRenderer.transform.localEulerAngles;
+                        break;
+
+                }
             }
         }
 

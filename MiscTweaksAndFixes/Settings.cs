@@ -287,6 +287,28 @@ namespace MiscTweaksAndFixes
                 onChanged: value => MythicSuperiorSummoning.Enabled = value
             );
 
+        [LocalizedString]
+        public const string WeaponPrefabFixesDescription = "Weapon Prefab Fixes";
+        
+        [LocalizedString]
+        public const string WeaponPrefabFixesToggleDescription = "Enabled";
+        private static Toggle WeaponPrefabFixesToggle =>
+            CreateSettingToggle(
+                nameof(WeaponPrefabFixesToggle),
+                defaultValue: true,
+                description: Localized.WeaponPrefabFixesToggleDescription,
+                onChanged: value => WeaponPrefabOrientationFixes.Enabled = value);
+
+        [LocalizedString]
+        public const string WeaponPrefabFixesEditModeToggleDescription = "Edit mode";
+
+        private static Toggle WeaponPrefabFixesEditModeToggle =>
+            CreateSettingToggle(
+                nameof(WeaponPrefabFixesEditModeToggle),
+                defaultValue: false,
+                description: Localized.WeaponPrefabFixesEditModeToggleDescription,
+                onChanged: value => WeaponPrefabOrientationFixes.EditMode = value);
+
         internal static void SettingsInit()
         {
             var settings = SettingsBuilder
@@ -311,6 +333,10 @@ namespace MiscTweaksAndFixes
 
                 .AddSubHeader(LocalizedStrings.Settings_RipAndTearHeader)
                 .AddToggle(RipAndTearToggle)
+
+                .AddSubHeader(Localized.WeaponPrefabFixesDescription)
+                .AddToggle(WeaponPrefabFixesToggle)
+                .AddToggle(WeaponPrefabFixesEditModeToggle)
 
                 .AddSubHeader(LocalizedStrings.Settings_DebugSubHeading)
                 .AddToggle(DebugLogToggle);
