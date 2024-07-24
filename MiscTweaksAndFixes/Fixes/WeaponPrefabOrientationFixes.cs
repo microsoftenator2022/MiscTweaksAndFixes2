@@ -6,8 +6,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-using Epic.OnlineServices;
-
 using HarmonyLib;
 
 using Kingmaker.Blueprints.Items.Weapons;
@@ -48,7 +46,13 @@ public class WeaponPrefabRotationConfig
     public Dictionary<UnitEquipmentVisualSlotType, Vector3> SheathModelRotations = [];
     
     public bool UseHandRotation = false;
-    public Vector3 HandRotation = default;
+    //public Vector3 HandRotation = default;
+
+    public bool EnableMainHandRotation = false;
+    public Vector3 MainHandRotation = default;
+
+    public bool EnableOffHandRotation = false;
+    public Vector3 OffHandRotation = default;
 
     public AutoAlignType WeaponSheathAutoAlignment = AutoAlignType.SheathPriority;
 
@@ -56,8 +60,9 @@ public class WeaponPrefabRotationConfig
     {
         var sb = new StringBuilder();
         sb.AppendLine($"{nameof(WeaponPrefabRotationConfig)} {this.AssetId} {this.Type}");
-        sb.AppendLine($"Hand rotation: {this.HandRotation}");
-        
+        sb.AppendLine($"Main Hand rotation: {this.MainHandRotation}");
+        sb.AppendLine($"Off Hand rotation: {this.OffHandRotation}");
+
         sb.Append("Belt rotations:");
         foreach (var (key, value) in this.BeltModelRotations.Select(pair => (pair.Key, pair.Value)))
         {
@@ -109,7 +114,10 @@ internal static class WeaponPrefabOrientationFixes
         {
             AssetId = "d26b2020e3ab8674cbf002c91b7d97a2",
             UseHandRotation = true,
-            HandRotation =  new(0, 90, 0)
+            EnableMainHandRotation = true,
+            MainHandRotation = new(0, 90, 0),
+            EnableOffHandRotation = true,
+            OffHandRotation = new(0, 90, 0)
         };
 
         foreach (var (slot, r) in sheathSlots)
@@ -218,6 +226,9 @@ internal static class WeaponPrefabOrientationFixes
         MicroLogger.Debug(() => $"Weapon config: {weaponConfig}");
         MicroLogger.Debug(() => $"Sheath config: {sheathConfig}");
         MicroLogger.Debug(() => $"Belt config: {beltConfig}");
+        MicroLogger.Debug(() => $"Hand: {__instance.HandTransform.gameObject}");
+        MicroLogger.Debug(() => $"Main Hand: {__instance.MainHandTransform.gameObject}");
+        MicroLogger.Debug(() => $"Off Hand: {__instance.OffHandTransform.gameObject}");
 
         if (sheathConfig is not null && sheathRenderer != null &&
             sheathConfig.SheathModelRotations.TryGetValue(__instance.VisualSlot, out var sheathRotation))
@@ -236,10 +247,23 @@ internal static class WeaponPrefabOrientationFixes
         }
         else if (weaponConfig is not null && visualModel != null)
         {
-            if (visualModel.transform.parent == __instance.HandTransform && weaponConfig.UseHandRotation)
+            if (visualModel.transform.parent == __instance.HandTransform)
             {
-                MicroLogger.Debug(() => $"Setting hand rotation {weaponConfig.HandRotation}");
-                weaponRenderer.transform.localEulerAngles = weaponConfig.HandRotation;
+                if (weaponConfig.UseHandRotation)
+                {
+                    if (weaponConfig.EnableMainHandRotation && __instance.HandTransform == __instance.MainHandTransform)
+                    {
+                        MicroLogger.Debug(() => $"Setting main hand rotation {weaponConfig.MainHandRotation}");
+                        weaponRenderer.transform.localEulerAngles = weaponConfig.MainHandRotation;
+
+                    }
+                    else if (weaponConfig.EnableOffHandRotation && __instance.HandTransform == __instance.OffHandTransform)
+                    {
+                        MicroLogger.Debug(() => $"Setting off hand rotation {weaponConfig.OffHandRotation}");
+                        weaponRenderer.transform.localEulerAngles = weaponConfig.OffHandRotation;
+
+                    }
+                }
             }
             else if (weaponConfig.WeaponSheathAutoAlignment != AutoAlignType.None && sheathRenderer != null)
             {
@@ -249,7 +273,7 @@ internal static class WeaponPrefabOrientationFixes
                         weaponRenderer.transform.localEulerAngles = sheathRenderer.transform.localEulerAngles;
                         break;
                     case AutoAlignType.WeaponPriority:
-                        weaponRenderer.transform.localEulerAngles = sheathRenderer.transform.localEulerAngles;
+                        sheathRenderer.transform.localEulerAngles = weaponRenderer.transform.localEulerAngles;
                         break;
 
                 }
