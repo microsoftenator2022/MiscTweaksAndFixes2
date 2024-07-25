@@ -46,8 +46,7 @@ public class WeaponPrefabRotationConfig
     public Dictionary<UnitEquipmentVisualSlotType, Vector3> SheathModelRotations = [];
     
     public bool UseHandRotation = false;
-    //public Vector3 HandRotation = default;
-
+    
     public bool EnableMainHandRotation = false;
     public Vector3 MainHandRotation = default;
 
@@ -56,27 +55,34 @@ public class WeaponPrefabRotationConfig
 
     public AutoAlignType WeaponSheathAutoAlignment = AutoAlignType.SheathPriority;
 
+    public bool RemoveSheath = false;
+
+    public bool MirrorOffHand = false;
+
     public override string ToString()
     {
         var sb = new StringBuilder();
-        sb.AppendLine($"{nameof(WeaponPrefabRotationConfig)} {this.AssetId} {this.Type}");
-        sb.AppendLine($"Main Hand rotation: {this.MainHandRotation}");
-        sb.AppendLine($"Off Hand rotation: {this.OffHandRotation}");
+        sb = sb
+            .AppendLine($"{nameof(WeaponPrefabRotationConfig)} {this.AssetId} {this.Type}")
+            .AppendLine($"Main Hand rotation: {this.MainHandRotation}")
+            .AppendLine($"Off Hand rotation: {this.OffHandRotation}");
 
-        sb.Append("Belt rotations:");
+        sb = sb.Append("Belt rotations:");
         foreach (var (key, value) in this.BeltModelRotations.Select(pair => (pair.Key, pair.Value)))
         {
-            sb.AppendLine();
-            sb.Append($"{key}: {value}");
+            sb = sb
+                .AppendLine()
+                .Append($"{key}: {value}");
         }
 
-        sb.AppendLine();
+        sb = sb.AppendLine();
 
-        sb.Append("Sheath rotations:");
+        sb = sb.Append("Sheath rotations:");
         foreach (var (key, value) in this.SheathModelRotations.Select(pair => (pair.Key, pair.Value)))
         {
-            sb.AppendLine();
-            sb.Append($"{key}: {value}");
+            sb = sb
+                .AppendLine()
+                .Append($"{key}: {value}");
         }
 
         return sb.ToString();
@@ -86,6 +92,7 @@ public class WeaponPrefabRotationConfig
 [HarmonyPatch]
 internal static class WeaponPrefabOrientationFixes
 {
+    private const string JsonFileName = "WeaponRotationCorrections.json";
     internal static bool Enabled = true;
     internal static bool EditMode =
 #if DEBUG
@@ -117,7 +124,8 @@ internal static class WeaponPrefabOrientationFixes
             EnableMainHandRotation = true,
             MainHandRotation = new(0, 90, 0),
             EnableOffHandRotation = true,
-            OffHandRotation = new(0, 90, 0)
+            OffHandRotation = new(0, 90, 0),
+            MirrorOffHand = true
         };
 
         foreach (var (slot, r) in sheathSlots)
@@ -135,13 +143,20 @@ internal static class WeaponPrefabOrientationFixes
 
     static List<WeaponPrefabRotationConfig>? configs = null;
 
-    static List<WeaponPrefabRotationConfig> LoadConfigs(string path)
-    {
-        return JsonConvert.DeserializeObject<List<WeaponPrefabRotationConfig>>(File.ReadAllText(path));
-    }
+    static List<WeaponPrefabRotationConfig> LoadConfigs(string path) =>
+        JsonConvert.DeserializeObject<List<WeaponPrefabRotationConfig>>(File.ReadAllText(path));
 
     static void SaveConfigs(string path) =>
         File.WriteAllText(path, JsonConvert.SerializeObject(Configs, Formatting.Indented));
+
+    static readonly Lazy<string> ConfigPath = new(() =>
+    {
+        var path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), JsonFileName);
+
+        MicroLogger.Debug(() => $"{nameof(WeaponPrefabOrientationFixes)} config path: {path}");
+
+        return path;
+    });
 
     static List<WeaponPrefabRotationConfig> Configs
     {
@@ -150,10 +165,12 @@ internal static class WeaponPrefabOrientationFixes
             if (configs is not null && !EditMode)
                 return configs;
 
-            var path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "WeaponRotationCorrections.json");
+            var path = ConfigPath.Value;
 
             if (!File.Exists(path))
             {
+                MicroLogger.Debug(() => $"Creating new {JsonFileName} config");
+
                 File.WriteAllText(path, JsonConvert.SerializeObject(
                     new List<WeaponPrefabRotationConfig>()
                     {
@@ -167,7 +184,7 @@ internal static class WeaponPrefabOrientationFixes
             }
             catch(Exception ex)
             {
-                MicroLogger.Error("Failed to read weapon prefab json", ex);
+                MicroLogger.Error($"Failed to read config from {path}", ex);
             }
 
             return configs!;
@@ -181,8 +198,8 @@ internal static class WeaponPrefabOrientationFixes
 
     static WeaponPrefabRotationConfig? GetSheathConfig(WeaponVisualParameters wvp)
     {
-        if ((wvp.m_WeaponSheathModelOverride?.AssetId).IsNullOrEmpty())
-            return GetWeaponConfig(wvp);
+        //if ((wvp.m_WeaponSheathModelOverride?.AssetId).IsNullOrEmpty())
+        //    return GetWeaponConfig(wvp);
 
         return Configs?.FirstOrDefault(config =>
             config.Type == ConfigType.SheathOverride &&
@@ -191,12 +208,134 @@ internal static class WeaponPrefabOrientationFixes
 
     static WeaponPrefabRotationConfig? GetBeltConfig(WeaponVisualParameters wvp)
     {
-        if ((wvp.m_WeaponBeltModelOverride?.AssetId).IsNullOrEmpty())
-            return GetWeaponConfig(wvp);
+        //if ((wvp.m_WeaponBeltModelOverride?.AssetId).IsNullOrEmpty())
+        //    return GetWeaponConfig(wvp);
 
         return Configs?.FirstOrDefault(config =>
             config.Type == ConfigType.BeltOverride &&
             config.AssetId == wvp.m_WeaponBeltModelOverride?.AssetId);
+    }
+
+    static void AutoAlignWeaponSheath(UnitViewHandSlotData hsd, AutoAlignType autoAlignType)
+    {
+        if (hsd.VisualModel == null || hsd.SheathVisualModel == null)
+            return;
+
+        var weaponRenderer = hsd.VisualModel.GetComponentInChildren<MeshRenderer>();
+        var sheathRenderer = hsd.VisualModel.GetComponentInChildren<MeshRenderer>();
+
+        if (weaponRenderer == null || sheathRenderer == null)
+            return;
+
+        switch (autoAlignType)
+        {
+            case AutoAlignType.WeaponPriority:
+                sheathRenderer.transform.localEulerAngles =  weaponRenderer.transform.localEulerAngles;
+                break;
+            case AutoAlignType.SheathPriority:
+                weaponRenderer.transform.localEulerAngles = sheathRenderer.transform.localEulerAngles;
+                break;
+        }
+    }
+
+    static AutoAlignType ConfigureWeapon(UnitViewHandSlotData hsd)
+    {
+        var none = AutoAlignType.None;
+
+        if (hsd.VisualModel == null)
+            return none;
+
+        var weaponRenderer = hsd.VisualModel.GetComponentInChildren<MeshRenderer>();
+
+        if (weaponRenderer == null)
+            return none;
+
+        var weaponConfig = GetWeaponConfig(hsd.VisibleItemVisualParameters);
+        MicroLogger.Debug(() => $"Weapon config: {weaponConfig}");
+
+        var beltConfig = GetBeltConfig(hsd.VisibleItemVisualParameters) ?? weaponConfig;
+
+        if (weaponConfig is null && beltConfig is null)
+            return none;
+
+        if (weaponConfig is not null &&
+            weaponConfig.UseHandRotation && hsd.VisualModel.transform.parent == hsd.HandTransform)
+        {
+            if (weaponConfig.EnableMainHandRotation && hsd.HandTransform == hsd.MainHandTransform)
+            {
+                MicroLogger.Debug(() => $"Setting main hand rotation {weaponConfig.MainHandRotation}");
+                weaponRenderer.transform.localEulerAngles = weaponConfig.MainHandRotation;
+            }
+            else if (weaponConfig.EnableOffHandRotation && hsd.HandTransform == hsd.OffHandTransform)
+            {
+                MicroLogger.Debug(() => $"Setting off hand rotation {weaponConfig.OffHandRotation}");
+                weaponRenderer.transform.localEulerAngles = weaponConfig.OffHandRotation;
+            }
+
+            if (!hsd.Owner.Descriptor.IsLeftHanded &&
+                weaponConfig.MirrorOffHand &&
+                hsd.HandTransform == hsd.OffHandTransform)
+            {
+                var s1 = hsd.VisualModel.transform.localScale;
+                var s2 = new Vector3(-s1.x, s1.y, s1.z);
+
+                MicroLogger.Debug(() => $"Setting off hand mirror: {s1} -> {s2}");
+
+                hsd.VisualModel.transform.localScale = s2;
+            }
+
+            return none;
+        }
+
+        MicroLogger.Debug(() => $"Belt config: {beltConfig}");
+
+        if (beltConfig is null)
+            return none;
+
+        if (beltConfig.BeltModelRotations.TryGetValue(hsd.VisualSlot, out var beltRotation))
+        {
+            MicroLogger.Debug(() => $"Setting weapon rotation: {beltRotation}");
+
+            weaponRenderer.transform.localEulerAngles = beltRotation;
+            
+            return none;
+        }
+
+        return beltConfig.WeaponSheathAutoAlignment;
+    }
+
+    static AutoAlignType ConfigureSheath(UnitViewHandSlotData hsd)
+    {
+        var none = AutoAlignType.None;
+
+        if (hsd.SheathVisualModel == null)
+            return none;
+
+        var sheathRenderer = hsd.SheathVisualModel.GetComponentInChildren<MeshRenderer>();
+
+        var sheathConfig = GetSheathConfig(hsd.VisibleItemVisualParameters) ?? GetWeaponConfig(hsd.VisibleItemVisualParameters);
+        MicroLogger.Debug(() => $"Sheath config: {sheathConfig}");
+
+        if (sheathConfig is null)
+            return none;
+
+        if (sheathConfig.RemoveSheath)
+        {
+            UnityEngine.Object.Destroy(hsd.SheathVisualModel);
+            sheathRenderer = null;
+        }
+
+        if (sheathRenderer == null)
+            return none;
+
+        if (sheathConfig.SheathModelRotations.TryGetValue(hsd.VisualSlot, out var sheathRotation))
+        {
+            sheathRenderer.transform.localEulerAngles = sheathRotation;
+
+            return none;
+        }
+        
+        return sheathConfig.WeaponSheathAutoAlignment;
     }
 
     [HarmonyPatch(typeof(UnitViewHandSlotData), nameof(UnitViewHandSlotData.AttachModel), [])]
@@ -209,76 +348,89 @@ internal static class WeaponPrefabOrientationFixes
         if (__instance.VisibleItemVisualParameters is null)
             return;
 
-        var weaponConfig = GetWeaponConfig(__instance.VisibleItemVisualParameters);
-        var sheathConfig = GetSheathConfig(__instance.VisibleItemVisualParameters);
-        var beltConfig = GetBeltConfig(__instance.VisibleItemVisualParameters);
+        //var weaponConfig = GetWeaponConfig(__instance.VisibleItemVisualParameters);
+        //var sheathConfig = GetSheathConfig(__instance.VisibleItemVisualParameters) ?? weaponConfig;
+        //var beltConfig = GetBeltConfig(__instance.VisibleItemVisualParameters) ?? weaponConfig;
 
-        if (weaponConfig is null && sheathConfig is null && beltConfig is null)
-            return;
+        //if (weaponConfig is null && sheathConfig is null && beltConfig is null)
+        //    return;
 
-        var visualModel = __instance.VisualModel;
-        var weaponRenderer = visualModel != null ? visualModel.GetComponentInChildren<MeshRenderer>() : null;
+        //var visualModel = __instance.VisualModel;
+        //var weaponRenderer = visualModel != null ? visualModel.GetComponentInChildren<MeshRenderer>() : null;
 
-        var sheathVisualModel = __instance.SheathVisualModel;
-        var sheathRenderer = sheathVisualModel != null ? sheathVisualModel.GetComponentInChildren<MeshRenderer>() : null;
+        //var sheathVisualModel = __instance.SheathVisualModel;
+        //var sheathRenderer = sheathVisualModel != null ? sheathVisualModel.GetComponentInChildren<MeshRenderer>() : null;
 
-        MicroLogger.Debug(() => $"Visual model is {visualModel}. Sheath model is {sheathVisualModel}. Slot is {__instance.VisualSlot}.");
-        MicroLogger.Debug(() => $"Weapon config: {weaponConfig}");
-        MicroLogger.Debug(() => $"Sheath config: {sheathConfig}");
-        MicroLogger.Debug(() => $"Belt config: {beltConfig}");
-        MicroLogger.Debug(() => $"Hand: {__instance.HandTransform.gameObject}");
-        MicroLogger.Debug(() => $"Main Hand: {__instance.MainHandTransform.gameObject}");
-        MicroLogger.Debug(() => $"Off Hand: {__instance.OffHandTransform.gameObject}");
+        MicroLogger.Debug(() => $"Visual model is {__instance.VisualModel}. Sheath model is {__instance.SheathVisualModel}. Slot is {__instance.VisualSlot}.");
 
-        if (sheathConfig is not null && sheathRenderer != null &&
-            sheathConfig.SheathModelRotations.TryGetValue(__instance.VisualSlot, out var sheathRotation))
-        {
-            MicroLogger.Debug(() => $"Setting sheath config {sheathRotation}");
+        var autoAlignWeapon = ConfigureWeapon(__instance);
+        var autoAlignSheath = ConfigureSheath(__instance);
 
-            sheathRenderer.transform.localEulerAngles = sheathRotation;
-        }
+        // Sheath config has priority
+        var autoAlign = autoAlignSheath != AutoAlignType.None ? autoAlignSheath : autoAlignWeapon;
 
-        if (weaponRenderer == null)
-            return;
-        
-        if (beltConfig is not null && beltConfig.BeltModelRotations.TryGetValue(__instance.VisualSlot, out var beltRotation))
-        {
-            weaponRenderer.transform.localEulerAngles = beltRotation;
-        }
-        else if (weaponConfig is not null && visualModel != null)
-        {
-            if (visualModel.transform.parent == __instance.HandTransform)
-            {
-                if (weaponConfig.UseHandRotation)
-                {
-                    if (weaponConfig.EnableMainHandRotation && __instance.HandTransform == __instance.MainHandTransform)
-                    {
-                        MicroLogger.Debug(() => $"Setting main hand rotation {weaponConfig.MainHandRotation}");
-                        weaponRenderer.transform.localEulerAngles = weaponConfig.MainHandRotation;
+        if (autoAlign != AutoAlignType.None)
+            AutoAlignWeaponSheath(__instance, autoAlign);
 
-                    }
-                    else if (weaponConfig.EnableOffHandRotation && __instance.HandTransform == __instance.OffHandTransform)
-                    {
-                        MicroLogger.Debug(() => $"Setting off hand rotation {weaponConfig.OffHandRotation}");
-                        weaponRenderer.transform.localEulerAngles = weaponConfig.OffHandRotation;
+        //MicroLogger.Debug(() => $"Weapon config: {weaponConfig}");
+        //MicroLogger.Debug(() => $"Sheath config: {sheathConfig}");
+        //MicroLogger.Debug(() => $"Belt config: {beltConfig}");
 
-                    }
-                }
-            }
-            else if (weaponConfig.WeaponSheathAutoAlignment != AutoAlignType.None && sheathRenderer != null)
-            {
-                switch (weaponConfig.WeaponSheathAutoAlignment)
-                {
-                    case AutoAlignType.SheathPriority:
-                        weaponRenderer.transform.localEulerAngles = sheathRenderer.transform.localEulerAngles;
-                        break;
-                    case AutoAlignType.WeaponPriority:
-                        sheathRenderer.transform.localEulerAngles = weaponRenderer.transform.localEulerAngles;
-                        break;
+        //if (sheathConfig is not null && sheathRenderer != null &&
+        //    sheathConfig.SheathModelRotations.TryGetValue(__instance.VisualSlot, out var sheathRotation))
+        //{
+        //    if (sheathConfig.RemoveSheath)
+        //    {
+        //        UnityEngine.Object.Destroy(sheathVisualModel);
+        //        sheathVisualModel = null;
+        //        sheathRenderer = null;
+        //    }
+        //    else
+        //    {
+        //        MicroLogger.Debug(() => $"Setting sheath config {sheathRotation}");
 
-                }
-            }
-        }
+        //        sheathRenderer.transform.localEulerAngles = sheathRotation;
+        //    }
+        //}
+
+        //if (weaponRenderer == null)
+        //    return;
+
+        //if (visualModel != null)
+        //{
+        //    if (weaponConfig is not null && visualModel.transform.parent == __instance.HandTransform)
+        //    {
+        //        if (weaponConfig.UseHandRotation)
+        //        {
+        //            if (weaponConfig.EnableMainHandRotation && __instance.HandTransform == __instance.MainHandTransform)
+        //            {
+        //                MicroLogger.Debug(() => $"Setting main hand rotation {weaponConfig.MainHandRotation}");
+        //                weaponRenderer.transform.localEulerAngles = weaponConfig.MainHandRotation;
+        //            }
+        //            else if (weaponConfig.EnableOffHandRotation && __instance.HandTransform == __instance.OffHandTransform)
+        //            {
+        //                MicroLogger.Debug(() => $"Setting off hand rotation {weaponConfig.OffHandRotation}");
+        //                weaponRenderer.transform.localEulerAngles = weaponConfig.OffHandRotation;
+        //            }
+        //        }
+        //    }
+        //    else if (beltConfig is not null && beltConfig.BeltModelRotations.TryGetValue(__instance.VisualSlot, out var beltRotation))
+        //    {
+        //        weaponRenderer.transform.localEulerAngles = beltRotation;
+        //    }
+        //    else if (sheathRenderer != null)
+        //    {
+        //        switch (beltConfig?.WeaponSheathAutoAlignment ?? weaponConfig?.WeaponSheathAutoAlignment ?? AutoAlignType.None)
+        //        {
+        //            case AutoAlignType.SheathPriority:
+        //                weaponRenderer.transform.localEulerAngles = sheathRenderer.transform.localEulerAngles;
+        //                break;
+        //            case AutoAlignType.WeaponPriority:
+        //                sheathRenderer.transform.localEulerAngles = weaponRenderer.transform.localEulerAngles;
+        //                break;
+        //        }
+        //    }
+        //}
 
         //MeshRenderer ren = __instance.SheathVisualModel?.GetComponentInChildren<MeshRenderer>();
         //bool flag = ren?.gameObject.name == "OHW_FalcataTaldor_Scabbard";
@@ -298,5 +450,4 @@ internal static class WeaponPrefabOrientationFixes
         //else
         //    r2.transform.localEulerAngles = ren.transform.localEulerAngles;
     }
-
 }
