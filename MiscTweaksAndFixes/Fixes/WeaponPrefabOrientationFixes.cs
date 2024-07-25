@@ -68,8 +68,11 @@ public class WeaponPrefabRotationConfig
         var sb = new StringBuilder();
         sb = sb
             .AppendLine($"{nameof(WeaponPrefabRotationConfig)} {this.AssetId} {this.Type}")
+            .AppendLine($"Comment: {this.Comment}")
             .AppendLine($"Main Hand rotation: {this.MainHandRotation}")
-            .AppendLine($"Off Hand rotation: {this.OffHandRotation}");
+            .AppendLine($"Off Hand rotation: {this.OffHandRotation}")
+            .AppendLine($"Remove sheath: {this.RemoveSheath}")
+            .AppendLine($"Mirror off hand: {this.MirrorOffHand}");
 
         sb = sb.Append("Belt rotations:");
         foreach (var (key, value) in this.BeltModelRotations.Select(pair => (pair.Key, pair.Value)))
@@ -96,7 +99,6 @@ public class WeaponPrefabRotationConfig
 [HarmonyPatch]
 internal static class WeaponPrefabOrientationFixes
 {
-    //const string JsonFileName = "WeaponRotationCorrections.json";
     const string ConfigDirectoryName = "WeaponPrefabCorrections";
     internal static bool Enabled = true;
     internal static bool EditMode =
@@ -145,7 +147,6 @@ internal static class WeaponPrefabOrientationFixes
         }
 
         ExampleFalcata.BeltModelRotations = ExampleFalcataSheath.SheathModelRotations;
-
     }
 
     static List<WeaponPrefabRotationConfig>? configs = null;
@@ -179,15 +180,6 @@ internal static class WeaponPrefabOrientationFixes
 
     //static void SaveConfigs(string path) =>
     //    File.WriteAllText(path, JsonConvert.SerializeObject(Configs, Formatting.Indented));
-
-    //static readonly Lazy<string> ConfigPath = new(() =>
-    //{
-    //    var path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), JsonFileName);
-
-    //    MicroLogger.Debug(() => $"{nameof(WeaponPrefabOrientationFixes)} config path: {path}");
-
-    //    return path;
-    //});
 
     static readonly Lazy<string> ConfigPath = new(() =>
     {
@@ -243,20 +235,29 @@ internal static class WeaponPrefabOrientationFixes
         slotData.GetWeaponVisualParams()?.Apply(mapper) ??
         slotData.GetWeaponTypeVisualParams()?.Apply(mapper);
 
+    // This place is not a place of honor
+    static string? NullIfEmpty(this string? s)
+    {
+        if (string.IsNullOrEmpty(s))
+            return null;
+
+        return s;
+    }
+
     static WeaponPrefabRotationConfig? GetWeaponConfig(UnitViewHandSlotData slotData) =>
         Configs?.FirstOrDefault(config =>
             config.Type == ConfigType.Weapon &&
-            config.AssetId == slotData.MapVisualParams(vp => vp.m_WeaponModel?.AssetId));
+            config.AssetId == slotData.MapVisualParams(vp => vp.m_WeaponModel?.AssetId.NullIfEmpty()));
 
     static WeaponPrefabRotationConfig? GetSheathConfig(UnitViewHandSlotData slotData) =>
         Configs?.FirstOrDefault(config =>
             config.Type == ConfigType.SheathOverride &&
-            config.AssetId == slotData.MapVisualParams(vp => vp.m_WeaponSheathModelOverride?.AssetId));
+            config.AssetId == slotData.MapVisualParams(vp => vp.m_WeaponSheathModelOverride?.AssetId.NullIfEmpty()));
 
     static WeaponPrefabRotationConfig? GetBeltConfig(UnitViewHandSlotData slotData) =>
         Configs?.FirstOrDefault(config =>
             config.Type == ConfigType.BeltOverride &&
-            config.AssetId == slotData.MapVisualParams(vp => vp.m_WeaponBeltModelOverride?.AssetId));
+            config.AssetId == slotData.MapVisualParams(vp => vp.m_WeaponBeltModelOverride?.AssetId.NullIfEmpty()));
 
     static void AutoAlignWeaponSheath(UnitViewHandSlotData hsd, AutoAlignType autoAlignType)
     {
@@ -292,7 +293,21 @@ internal static class WeaponPrefabOrientationFixes
         if (weaponRenderer == null)
             return none;
 
+        MicroLogger.Debug(() =>
+        {
+            var sb = new StringBuilder()
+                .AppendLine("Prefab assetId candidates:")
+                .AppendLine($"VisualSource weapon: {hsd.GetVisualSourceWeaponVisualParams()?.m_WeaponModel?.AssetId.NullIfEmpty()}")
+                .AppendLine($"VisualSource weapon type: {hsd.GetVisualSourceWeaponTypeVisualParams()?.m_WeaponModel?.AssetId.NullIfEmpty()}")
+                .AppendLine($"Blueprint weapon: {hsd.GetWeaponVisualParams()?.m_WeaponModel?.AssetId.NullIfEmpty()}")
+                .AppendLine($"Blueprint weapon type: {hsd.GetWeaponTypeVisualParams()?.m_WeaponModel?.AssetId.NullIfEmpty()}")
+                .AppendLine($"Result: {hsd.MapVisualParams(vp => vp.m_WeaponModel?.AssetId.NullIfEmpty())}");
+
+            return sb.ToString();
+        });
+
         var weaponConfig = GetWeaponConfig(hsd);
+
         MicroLogger.Debug(() => $"Weapon config: {weaponConfig}");
 
         var beltConfig = GetBeltConfig(hsd) ?? weaponConfig;
