@@ -17,12 +17,516 @@ using MicroWrath.Util;
 using MicroWrath.Util.Linq;
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 
 using UnityEngine;
 
+using static MiscTweaksAndFixes.Fixes.WeaponPrefabCorrectionConfig;
 using static MiscTweaksAndFixes.Fixes.WeaponPrefabRotationConfig;
 
 namespace MiscTweaksAndFixes.Fixes;
+
+public class WeaponPrefabCorrectionConfig
+{
+    [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public string? Comment;
+
+    [JsonIgnore]
+    public string? SourceFileName;
+
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum RotationAlignmentSource
+    {
+        None,
+        Sheath,
+        Weapon
+    }
+
+    [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public string? WeaponModelAssetId;
+
+    [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public string? SheathOverrideModelAssetId;
+
+    [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public string? BeltOverrideModelAssetId;
+
+    public class SlotConfig
+    {
+        public RotationAlignmentSource WeaponRotationSource;
+        public Vector3 WeaponRotation;
+        public bool ShouldSerializeWeaponRotation() => WeaponRotationSource is RotationAlignmentSource.Weapon;
+
+        public bool HideSheath = false;
+        public RotationAlignmentSource SheathRotationSource;
+        public Vector3 SheathRotation;
+        public bool ShouldSerializeSheathRotation() => !HideSheath && SheathRotationSource is RotationAlignmentSource.Sheath;
+
+        public override string ToString()
+        {
+            var weaponRotationString = this.WeaponRotationSource == RotationAlignmentSource.Weapon ? this.WeaponRotation.ToString() : "";
+            var sheathRotationString = this.SheathRotationSource == RotationAlignmentSource.Weapon ? this.SheathRotation.ToString() : "";
+
+            return $"Weapon rotation: {this.WeaponRotationSource} {weaponRotationString}. " +
+                $"Sheath rotation: {this.SheathRotationSource} {sheathRotationString}. " +
+                $"Hide sheath? {this.HideSheath}";
+        }
+    }
+
+    public Dictionary<UnitEquipmentVisualSlotType, SlotConfig> Slots = [];
+
+    public bool MirrorOffHand = false;
+
+    public bool SetMainHandRotation;
+    public Vector3 MainHandRotation;
+
+    public bool SetOffHandRotation;
+    public Vector3 OffHandRotation;
+    public bool ShouldSerializeMainHandRotation() => SetMainHandRotation;
+    public bool ShouldSerializeOffHandRotation() => SetOffHandRotation;
+
+    public RotationAlignmentSource DefaultRotation = RotationAlignmentSource.Sheath;
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        
+        sb = sb
+            .AppendLine($"{nameof(WeaponPrefabCorrectionConfig)}")
+            .AppendLine($"Source file: {this.SourceFileName}")
+            .AppendLine($"Comment: {this.Comment}")
+            .AppendLine($"Weapon assetId: {this.WeaponModelAssetId}")
+            .AppendLine($"Sheath override assetId: {this.SheathOverrideModelAssetId}")
+            .AppendLine($"Belt override assetId: {this.BeltOverrideModelAssetId}")
+            .AppendLine($"Main Hand rotation: {this.MainHandRotation}")
+            .AppendLine($"Off Hand rotation: {this.OffHandRotation}")
+            .AppendLine($"Mirror off hand: {this.MirrorOffHand}");
+
+        sb = sb.Append("Slots config:");
+
+        foreach (var slot in this.Slots)
+        {
+            sb = sb.AppendLine()
+                .Append($"  {slot}");
+        }
+
+        return sb.ToString();
+    }
+}
+
+static class WeaponPrefabConfig
+{
+    static WeaponVisualParameters? GetVisualSourceWeaponVisualParams(this UnitViewHandSlotData slotData) =>
+        (slotData.VisibleItem.VisualSourceItemBlueprint as BlueprintItemWeapon)?.VisualParameters;
+
+    static WeaponVisualParameters? GetVisualSourceWeaponTypeVisualParams(this UnitViewHandSlotData slotData) =>
+        (slotData.VisibleItem.VisualSourceItemBlueprint as BlueprintItemWeapon)?.Type.VisualParameters;
+
+    static WeaponVisualParameters? GetWeaponVisualParams(this UnitViewHandSlotData slotData) =>
+        (slotData.VisibleItem.Blueprint as BlueprintItemWeapon)?.VisualParameters;
+
+    static WeaponVisualParameters? GetWeaponTypeVisualParams(this UnitViewHandSlotData slotData) =>
+        (slotData.VisibleItem.Blueprint as BlueprintItemWeapon)?.Type.VisualParameters;
+
+    static WeaponVisualParameters? VisualParametersSource(this UnitViewHandSlotData slotData)
+    {
+        bool check(WeaponVisualParameters? wvp) => !(wvp?.m_WeaponModel?.AssetId.IsNullOrEmpty() ?? true);
+
+        var vsw = slotData.GetVisualSourceWeaponVisualParams();
+        MicroLogger.Debug(() => $"VisualSourceWeapon: {vsw?.m_WeaponModel?.AssetId}");
+
+        var vswt = slotData.GetVisualSourceWeaponTypeVisualParams();
+        MicroLogger.Debug(() => $"VisualSourceWeaponType: {vswt?.m_WeaponModel?.AssetId}");
+
+        var w = slotData.GetWeaponVisualParams();
+        MicroLogger.Debug(() => $"Weapon: {w?.m_WeaponModel?.AssetId}");
+
+        var wt = slotData.GetWeaponTypeVisualParams();
+        MicroLogger.Debug(() => $"WeaponType: {wt?.m_WeaponModel?.AssetId}");
+
+        if (check(vsw))
+            return vsw;
+        
+        if (check(vswt))
+            return vswt;
+
+        if (check(w))
+            return w;
+        
+        if (check(wt))
+            return wt;
+
+        return null;
+    }
+
+    static string? NullIfEmpty(this string? s) => string.IsNullOrEmpty(s) ? null : s;
+
+    static bool IsMainHand(this UnitViewHandSlotData slotData) =>
+        slotData.VisualModel.transform.parent == slotData.MainHandTransform;
+
+    static bool IsOffHand(this UnitViewHandSlotData slotData) =>
+        slotData.VisualModel.transform.parent == slotData.OffHandTransform;
+    static MeshRenderer? GetWeaponRenderer(this UnitViewHandSlotData slotData) => slotData.VisualModel.GetComponentInChildren<MeshRenderer>();
+
+    static void ApplyHandsCorrection(UnitViewHandSlotData slotData, WeaponPrefabCorrectionConfig config)
+    {
+
+        var weaponRenderer = slotData.GetWeaponRenderer();
+
+        if (weaponRenderer == null)
+            return;
+
+        if (config.SetMainHandRotation && slotData.IsMainHand())
+        {
+            MicroLogger.Debug(() => $"Setting main hand rotation {config.MainHandRotation}");
+            weaponRenderer.transform.localEulerAngles = config.MainHandRotation;
+        }
+
+        if (slotData.IsOffHand())
+        {
+            if (!slotData.Owner.Descriptor.IsLeftHanded && config.MirrorOffHand)
+            {
+                var s1 = slotData.VisualModel.transform.localScale;
+                var s2 = new Vector3(-s1.x, s1.y, s1.z);
+
+                MicroLogger.Debug(() => $"Setting off hand mirror: {s1} -> {s2}");
+                slotData.VisualModel.transform.localScale = s2;
+            }
+
+            if (config.SetOffHandRotation)
+            {
+                MicroLogger.Debug(() => $"Setting off hand rotation {config.OffHandRotation}");
+                weaponRenderer.transform.localEulerAngles = config.OffHandRotation;
+            }
+        }
+    }
+
+    static List<WeaponPrefabCorrectionConfig> Configs = [];
+
+    enum PrefabType
+    {
+        Weapon,
+        SheathOverride,
+        BeltOverride
+    }
+
+    static WeaponPrefabCorrectionConfig? TryGetConfig(
+        PrefabType type,
+        string? weaponAssetId,
+        string? sheathOverrideAssetId,
+        string? beltOverrideAssetId) =>
+        Configs.Select(config =>
+        {
+            switch (type)
+            {
+                case PrefabType.Weapon:
+                    if (config.WeaponModelAssetId.IsNullOrEmpty())
+                        return (config, count: 0);
+                    break;
+
+                case PrefabType.SheathOverride:
+                    if (config.SheathOverrideModelAssetId.IsNullOrEmpty())
+                        return (config, count: 0);
+                    break;
+
+                case PrefabType.BeltOverride:
+                    if (!config.BeltOverrideModelAssetId.IsNullOrEmpty())
+                        return (config, count: 0);
+                    break;
+            }
+
+            var count = 0;
+
+            if (!weaponAssetId.IsNullOrEmpty() && config.WeaponModelAssetId == weaponAssetId)
+                count++;
+
+            if (!sheathOverrideAssetId.IsNullOrEmpty() && config.SheathOverrideModelAssetId == sheathOverrideAssetId)
+                count++;
+
+            if (!beltOverrideAssetId.IsNullOrEmpty() && config.BeltOverrideModelAssetId == beltOverrideAssetId)
+                count++;
+
+            return (config, count);
+        }).Where(pair => pair.count > 0)
+        .OrderByDescending(pair => pair.count)
+        .Select(pair => pair.config)
+        .FirstOrDefault();
+
+    internal static void ApplyCorrections(UnitViewHandSlotData slotData)
+    {
+        if (slotData.VisualModel is null)
+            return;
+
+        var visualParams = slotData.VisualParametersSource();
+
+        if (visualParams is null)
+        {
+            MicroLogger.Warning($"Could not find {nameof(WeaponVisualParameters)} source for {slotData.VisibleItem}");
+            return;
+        }
+
+        var weaponRenderer = slotData.GetWeaponRenderer();
+
+        if (weaponRenderer == null)
+        {
+            MicroLogger.Warning($"Could not get renderer for {slotData.VisualModel}");
+            return;
+        }
+
+        var weaponModelAssetId = visualParams.m_WeaponModel?.AssetId.NullIfEmpty();
+        var beltModelOverrideAssetId = visualParams.m_WeaponBeltModelOverride?.AssetId.NullIfEmpty();
+        var sheathModelOverrideAssetId = visualParams.m_WeaponSheathModelOverride?.AssetId.NullIfEmpty();
+
+        MicroLogger.Debug(() =>
+            $"Weapon: {weaponModelAssetId ?? "NULL"} " +
+            $"Sheath override: {sheathModelOverrideAssetId ?? "NULL"} " +
+            $"Belt override: {beltModelOverrideAssetId ?? "NULL"}");
+
+        var weaponConfig = TryGetConfig(PrefabType.Weapon, weaponModelAssetId, sheathModelOverrideAssetId, beltModelOverrideAssetId);
+        MicroLogger.Debug(() =>
+        {
+            var sb = new StringBuilder();
+
+            sb.Append($"Weapon config: {weaponConfig?.SourceFileName} {weaponConfig?.WeaponModelAssetId}");
+            if (weaponConfig?.Comment is string comment && comment != "")
+            {
+                sb.AppendLine()
+                    .Append($"  \"{comment}\"");
+            }
+
+            return sb.ToString();
+        });
+
+        var beltConfig = TryGetConfig(PrefabType.BeltOverride, weaponModelAssetId, sheathModelOverrideAssetId, beltModelOverrideAssetId);
+        MicroLogger.Debug(() =>
+        {
+            var sb = new StringBuilder();
+
+            sb.Append($"Belt config: {beltConfig?.SourceFileName} {beltConfig?.BeltOverrideModelAssetId}");
+            if (beltConfig?.Comment is string comment && comment != "")
+            {
+                sb.AppendLine()
+                    .Append($"  \"{comment}\"");
+            }
+
+            return sb.ToString();
+        });
+
+        var sheathConfig = TryGetConfig(PrefabType.SheathOverride, weaponModelAssetId, sheathModelOverrideAssetId, beltModelOverrideAssetId);
+        MicroLogger.Debug(() =>
+        {
+            var sb = new StringBuilder();
+
+            sb.Append($"Sheath config: {sheathConfig?.SourceFileName} {sheathConfig?.SheathOverrideModelAssetId}");
+            if (sheathConfig?.Comment is string comment && comment != "")
+            {
+                sb.AppendLine()
+                    .Append($"  \"{comment}\"");
+            }
+
+            return sb.ToString();
+        });
+
+        var weaponSlotConfig = (weaponConfig?.Slots.TryGetValue(slotData.VisualSlot, out var wsConfig) ?? false) ? wsConfig : null;
+
+        var beltSlotConfig = (beltConfig?.Slots.TryGetValue(slotData.VisualSlot, out var bsConfig) ?? false) ? bsConfig : weaponSlotConfig;
+
+        if (weaponConfig is not null && slotData.VisualModel.transform.parent == slotData.HandTransform)
+        {
+            ApplyHandsCorrection(slotData, weaponConfig);
+        }
+        else if (beltSlotConfig is not null && beltSlotConfig.WeaponRotationSource is RotationAlignmentSource.Weapon)
+        {
+            MicroLogger.Debug(() => $"Setting {slotData.VisualSlot} weapon rotation: {beltSlotConfig.WeaponRotation}");
+            weaponRenderer.transform.localEulerAngles = beltSlotConfig.WeaponRotation;
+        }
+        else if (beltConfig is not null && beltSlotConfig is null && beltConfig.DefaultRotation is RotationAlignmentSource.Sheath)
+        {
+            beltSlotConfig = new() { WeaponRotationSource = RotationAlignmentSource.Sheath };
+        }
+        else if (weaponConfig is not null && beltSlotConfig is null && weaponConfig.DefaultRotation is RotationAlignmentSource.Sheath)
+        {
+            beltSlotConfig = new() { WeaponRotationSource = RotationAlignmentSource.Sheath };
+        }
+
+        if (slotData.SheathVisualModel == null)
+            return;
+
+        var sheathSlotConfig = (sheathConfig?.Slots.TryGetValue(slotData.VisualSlot, out var ssConfig) ?? false) ? ssConfig : weaponSlotConfig;
+
+        var sheathRenderer = slotData.SheathVisualModel.GetComponentInChildren<MeshRenderer>();
+
+        if (sheathSlotConfig is not null)
+        {
+            if (sheathSlotConfig.SheathRotationSource is RotationAlignmentSource.Sheath)
+            {
+                MicroLogger.Debug(() => $"Setting {slotData.VisualSlot} sheath rotation: {sheathSlotConfig.SheathRotation}");
+                sheathRenderer.transform.localEulerAngles = sheathSlotConfig.SheathRotation;
+            }
+
+            if (sheathSlotConfig.HideSheath || (beltSlotConfig?.HideSheath ?? false))
+            {
+                MicroLogger.Debug(() => $"Hiding sheath {slotData.SheathVisualModel}");
+                sheathRenderer.enabled = false;
+            }
+        }
+        else if (sheathConfig is not null && sheathConfig.DefaultRotation is RotationAlignmentSource.Weapon)
+        {
+            sheathSlotConfig = new() { SheathRotationSource = RotationAlignmentSource.Weapon };
+        }
+
+        if (sheathSlotConfig is not null && sheathSlotConfig.SheathRotationSource is RotationAlignmentSource.Weapon)
+        {
+            MicroLogger.Debug(() => $"Setting sheath rotation from weapon: {weaponRenderer.transform.localEulerAngles}");
+            sheathRenderer.transform.localEulerAngles = weaponRenderer.transform.localEulerAngles;
+        }
+
+        if (beltSlotConfig is not null && beltSlotConfig.WeaponRotationSource is RotationAlignmentSource.Sheath &&
+            slotData.VisualModel.transform.parent != slotData.HandTransform)
+        {
+            MicroLogger.Debug(() => $"Setting weapon rotation from sheath: {sheathRenderer.transform.localEulerAngles}");
+            weaponRenderer.transform.localEulerAngles = sheathRenderer.transform.localEulerAngles;
+        }
+    }
+
+    static string UpgradeConfigsFile(string fileName, IEnumerable<WeaponPrefabRotationConfig> configs)
+    {
+        WeaponPrefabCorrectionConfig upgradeConfig(WeaponPrefabRotationConfig oldConfig)
+        {
+            var newConfig = new WeaponPrefabCorrectionConfig()
+            {
+                SourceFileName = fileName,
+                Comment = AccessTools.Field(typeof(WeaponPrefabRotationConfig), "Comment").GetValue(oldConfig) as string,
+            };
+
+            switch (oldConfig.Type)
+            {
+                case ConfigType.Weapon:
+                    newConfig.WeaponModelAssetId = oldConfig.AssetId;
+                    break;
+                case ConfigType.SheathOverride:
+                    newConfig.SheathOverrideModelAssetId = oldConfig.AssetId;
+                    break;
+                case ConfigType.BeltOverride:
+                    newConfig.BeltOverrideModelAssetId = oldConfig.AssetId;
+                    break;
+            }
+
+            foreach (var beltRotation in oldConfig.BeltModelRotations)
+            {
+                if (!newConfig.Slots.ContainsKey(beltRotation.Key))
+                    newConfig.Slots[beltRotation.Key] = new();
+
+                var slotConfig = newConfig.Slots[beltRotation.Key];
+
+                slotConfig.WeaponRotationSource = RotationAlignmentSource.Weapon;
+                slotConfig.WeaponRotation = beltRotation.Value;
+
+                slotConfig.HideSheath = oldConfig.RemoveSheath;
+            }
+
+            foreach (var sheathRotation in oldConfig.SheathModelRotations)
+            {
+                if (!newConfig.Slots.ContainsKey(sheathRotation.Key))
+                    newConfig.Slots[sheathRotation.Key] = new();
+
+                var slotConfig = newConfig.Slots[sheathRotation.Key];
+
+                slotConfig.SheathRotationSource = RotationAlignmentSource.Sheath;
+                slotConfig.SheathRotation = sheathRotation.Value;
+
+                slotConfig.HideSheath = oldConfig.RemoveSheath;
+            }
+
+            if (oldConfig.UseHandRotation)
+            {
+                if (oldConfig.EnableMainHandRotation)
+                {
+                    newConfig.SetMainHandRotation = true;
+                    newConfig.MainHandRotation = oldConfig.MainHandRotation;
+                }
+
+                if (oldConfig.EnableOffHandRotation)
+                {
+                    newConfig.SetOffHandRotation = true;
+                    newConfig.OffHandRotation = oldConfig.OffHandRotation;
+                }
+            }
+
+            newConfig.MirrorOffHand = oldConfig.MirrorOffHand;
+
+            return newConfig;
+        }
+
+        var newConfigs = configs.Select(upgradeConfig);
+
+        return JsonConvert.SerializeObject(newConfigs, Formatting.Indented);
+    }
+
+    static void BackupOldConfig(string path)
+    {
+        var directory = Path.Combine(Path.GetDirectoryName(path), "OldConfigsFormat");
+
+        if (!Directory.Exists(directory))
+            _ = Directory.CreateDirectory(directory);
+
+        File.Move(path, Path.Combine(directory,
+            (Path.GetFileNameWithoutExtension(path) +
+            "_" +
+            DateTimeOffset.Now.ToString("s").Replace(":", "_") +
+            Path.GetExtension(path))));
+    }
+
+    static IEnumerable<WeaponPrefabCorrectionConfig> LoadConfigsFromFile(string path)
+    {
+        MicroLogger.Debug(() => $"Load from {path}");
+
+        try
+        {
+            string text = File.ReadAllText(path);
+
+            var ja = JArray.Parse(text);
+
+            if (ja[0] is JObject obj && obj.Properties().Any(p => p.Name == "WeaponSheathAutoAlignment"))
+            {
+                BackupOldConfig(path);
+                text = UpgradeConfigsFile(Path.GetFileName(path), JsonConvert.DeserializeObject<List<WeaponPrefabRotationConfig>>(text));
+                File.WriteAllText(path, text);
+            }
+
+            return JsonConvert.DeserializeObject<List<WeaponPrefabCorrectionConfig>>(text)
+                .Select(c => { c.SourceFileName = Path.GetFileName(path); return c; });
+        }
+        catch (Exception ex)
+        {
+            MicroLogger.Error($"Error loading config file {path}", ex);
+
+            return [];
+        }
+    }
+
+    internal static List<WeaponPrefabCorrectionConfig> LoadConfigs(string configsDirectory)
+    {
+        if (!WeaponPrefabOrientationFixes.EditMode && Configs.Any())
+            return Configs;
+
+
+        if (!Directory.Exists(configsDirectory))
+        {
+            //Directory.CreateDirectory(configsDirectory);
+
+            _ = WeaponPrefabOrientationFixes.Configs;
+        }
+
+        foreach (var f in Directory.EnumerateFiles(configsDirectory, "*.json"))
+        {
+            Configs.AddRange(LoadConfigsFromFile(f));
+        }
+
+        return Configs;
+    }
+}
 
 public class WeaponPrefabRotationConfig
 {
@@ -108,8 +612,8 @@ internal static class WeaponPrefabOrientationFixes
         false;
 #endif
 
-    static readonly WeaponPrefabRotationConfig ExampleFalcata;
-    static readonly WeaponPrefabRotationConfig ExampleFalcataSheath;
+    internal static readonly WeaponPrefabRotationConfig ExampleFalcata;
+    internal static readonly WeaponPrefabRotationConfig ExampleFalcataSheath;
 
     static WeaponPrefabOrientationFixes()
     {
@@ -154,7 +658,7 @@ internal static class WeaponPrefabOrientationFixes
     static List<WeaponPrefabRotationConfig> LoadConfigs(string path) =>
         JsonConvert.DeserializeObject<List<WeaponPrefabRotationConfig>>(File.ReadAllText(path));
 
-    static IEnumerable<WeaponPrefabRotationConfig> LoadConfigsFromDirectory(string dir)
+    internal static IEnumerable<WeaponPrefabRotationConfig> LoadConfigsFromDirectory(string dir)
     {
         foreach (var f in Directory.EnumerateFiles(dir, "*.json"))
         {
@@ -189,7 +693,7 @@ internal static class WeaponPrefabOrientationFixes
         return path;
     });
 
-    static IEnumerable<WeaponPrefabRotationConfig> Configs
+    internal static IEnumerable<WeaponPrefabRotationConfig> Configs
     {
         get
         {
@@ -216,185 +720,6 @@ internal static class WeaponPrefabOrientationFixes
         }
     }
 
-    static WeaponVisualParameters? GetVisualSourceWeaponVisualParams(this UnitViewHandSlotData slotData) =>
-        (slotData.VisibleItem.VisualSourceItemBlueprint as BlueprintItemWeapon)?.VisualParameters;
-
-    static WeaponVisualParameters? GetVisualSourceWeaponTypeVisualParams(this UnitViewHandSlotData slotData) =>
-        (slotData.VisibleItem.VisualSourceItemBlueprint as BlueprintItemWeapon)?.Type.VisualParameters;
-    
-    static WeaponVisualParameters? GetWeaponVisualParams(this UnitViewHandSlotData slotData) =>
-        (slotData.VisibleItem.Blueprint as BlueprintItemWeapon)?.VisualParameters;
-
-    static WeaponVisualParameters? GetWeaponTypeVisualParams(this UnitViewHandSlotData slotData) =>
-        (slotData.VisibleItem.Blueprint as BlueprintItemWeapon)?.Type.VisualParameters;
-
-    static T? MapVisualParams<T>(this UnitViewHandSlotData slotData, Func<WeaponVisualParameters, T?> mapper)
-        where T : class =>
-        slotData.GetVisualSourceWeaponVisualParams()?.Apply(mapper) ??
-        slotData.GetVisualSourceWeaponTypeVisualParams()?.Apply(mapper) ??
-        slotData.GetWeaponVisualParams()?.Apply(mapper) ??
-        slotData.GetWeaponTypeVisualParams()?.Apply(mapper);
-
-    // This place is not a place of honor
-    static string? NullIfEmpty(this string? s)
-    {
-        if (string.IsNullOrEmpty(s))
-            return null;
-
-        return s;
-    }
-
-    static WeaponPrefabRotationConfig? GetWeaponConfig(UnitViewHandSlotData slotData) =>
-        Configs?.FirstOrDefault(config =>
-            config.Type == ConfigType.Weapon &&
-            config.AssetId == slotData.MapVisualParams(vp => vp.m_WeaponModel?.AssetId.NullIfEmpty()));
-
-    static WeaponPrefabRotationConfig? GetSheathConfig(UnitViewHandSlotData slotData) =>
-        Configs?.FirstOrDefault(config =>
-            config.Type == ConfigType.SheathOverride &&
-            config.AssetId == slotData.MapVisualParams(vp => vp.m_WeaponSheathModelOverride?.AssetId.NullIfEmpty()));
-
-    static WeaponPrefabRotationConfig? GetBeltConfig(UnitViewHandSlotData slotData) =>
-        Configs?.FirstOrDefault(config =>
-            config.Type == ConfigType.BeltOverride &&
-            config.AssetId == slotData.MapVisualParams(vp => vp.m_WeaponBeltModelOverride?.AssetId.NullIfEmpty()));
-
-    static void AutoAlignWeaponSheath(UnitViewHandSlotData hsd, AutoAlignType autoAlignType)
-    {
-        if (hsd.VisualModel == null || hsd.SheathVisualModel == null)
-            return;
-
-        var weaponRenderer = hsd.VisualModel.GetComponentInChildren<MeshRenderer>();
-        var sheathRenderer = hsd.VisualModel.GetComponentInChildren<MeshRenderer>();
-
-        if (weaponRenderer == null || sheathRenderer == null)
-            return;
-
-        switch (autoAlignType)
-        {
-            case AutoAlignType.WeaponPriority:
-                sheathRenderer.transform.localEulerAngles =  weaponRenderer.transform.localEulerAngles;
-                break;
-            case AutoAlignType.SheathPriority:
-                weaponRenderer.transform.localEulerAngles = sheathRenderer.transform.localEulerAngles;
-                break;
-        }
-    }
-
-    static AutoAlignType ConfigureWeapon(UnitViewHandSlotData hsd)
-    {
-        var none = AutoAlignType.None;
-
-        if (hsd.VisualModel == null)
-            return none;
-
-        var weaponRenderer = hsd.VisualModel.GetComponentInChildren<MeshRenderer>();
-
-        if (weaponRenderer == null)
-            return none;
-
-        MicroLogger.Debug(() =>
-        {
-            var sb = new StringBuilder()
-                .AppendLine("Prefab assetId candidates:")
-                .AppendLine($"VisualSource weapon: {hsd.GetVisualSourceWeaponVisualParams()?.m_WeaponModel?.AssetId.NullIfEmpty()}")
-                .AppendLine($"VisualSource weapon type: {hsd.GetVisualSourceWeaponTypeVisualParams()?.m_WeaponModel?.AssetId.NullIfEmpty()}")
-                .AppendLine($"Blueprint weapon: {hsd.GetWeaponVisualParams()?.m_WeaponModel?.AssetId.NullIfEmpty()}")
-                .AppendLine($"Blueprint weapon type: {hsd.GetWeaponTypeVisualParams()?.m_WeaponModel?.AssetId.NullIfEmpty()}")
-                .AppendLine($"Result: {hsd.MapVisualParams(vp => vp.m_WeaponModel?.AssetId.NullIfEmpty())}");
-
-            return sb.ToString();
-        });
-
-        var weaponConfig = GetWeaponConfig(hsd);
-
-        MicroLogger.Debug(() => $"Weapon config: {weaponConfig}");
-
-        var beltConfig = GetBeltConfig(hsd) ?? weaponConfig;
-
-        if (weaponConfig is null && beltConfig is null)
-            return none;
-
-        if (weaponConfig is not null &&
-            weaponConfig.UseHandRotation && hsd.VisualModel.transform.parent == hsd.HandTransform)
-        {
-            if (weaponConfig.EnableMainHandRotation && hsd.HandTransform == hsd.MainHandTransform)
-            {
-                MicroLogger.Debug(() => $"Setting main hand rotation {weaponConfig.MainHandRotation}");
-                weaponRenderer.transform.localEulerAngles = weaponConfig.MainHandRotation;
-            }
-            else if (weaponConfig.EnableOffHandRotation && hsd.HandTransform == hsd.OffHandTransform)
-            {
-                MicroLogger.Debug(() => $"Setting off hand rotation {weaponConfig.OffHandRotation}");
-                weaponRenderer.transform.localEulerAngles = weaponConfig.OffHandRotation;
-            }
-
-            if (!hsd.Owner.Descriptor.IsLeftHanded &&
-                weaponConfig.MirrorOffHand &&
-                hsd.HandTransform == hsd.OffHandTransform)
-            {
-                var s1 = hsd.VisualModel.transform.localScale;
-                var s2 = new Vector3(-s1.x, s1.y, s1.z);
-
-                MicroLogger.Debug(() => $"Setting off hand mirror: {s1} -> {s2}");
-
-                hsd.VisualModel.transform.localScale = s2;
-            }
-
-            return none;
-        }
-
-        MicroLogger.Debug(() => $"Belt config: {beltConfig}");
-
-        if (beltConfig is null)
-            return none;
-
-        if (beltConfig.BeltModelRotations.TryGetValue(hsd.VisualSlot, out var beltRotation))
-        {
-            MicroLogger.Debug(() => $"Setting weapon rotation: {beltRotation}");
-
-            weaponRenderer.transform.localEulerAngles = beltRotation;
-            
-            return none;
-        }
-
-        return beltConfig.WeaponSheathAutoAlignment;
-    }
-
-    static AutoAlignType ConfigureSheath(UnitViewHandSlotData hsd)
-    {
-        var none = AutoAlignType.None;
-
-        if (hsd.SheathVisualModel == null)
-            return none;
-
-        var sheathRenderer = hsd.SheathVisualModel.GetComponentInChildren<MeshRenderer>();
-
-        var sheathConfig = GetSheathConfig(hsd) ?? GetWeaponConfig(hsd);
-        MicroLogger.Debug(() => $"Sheath config: {sheathConfig}");
-
-        if (sheathConfig is null)
-            return none;
-
-        if (sheathConfig.RemoveSheath)
-        {
-            UnityEngine.Object.Destroy(hsd.SheathVisualModel);
-            sheathRenderer = null;
-        }
-
-        if (sheathRenderer == null)
-            return none;
-
-        if (sheathConfig.SheathModelRotations.TryGetValue(hsd.VisualSlot, out var sheathRotation))
-        {
-            sheathRenderer.transform.localEulerAngles = sheathRotation;
-
-            return none;
-        }
-        
-        return sheathConfig.WeaponSheathAutoAlignment;
-    }
-
     [HarmonyPatch(typeof(UnitViewHandSlotData), nameof(UnitViewHandSlotData.AttachModel), [])]
     [HarmonyPostfix]
     static void AttachModel_Postfix(UnitViewHandSlotData __instance)
@@ -407,13 +732,8 @@ internal static class WeaponPrefabOrientationFixes
 
         MicroLogger.Debug(() => $"Visual model is {__instance.VisualModel}. Sheath model is {__instance.SheathVisualModel}. Slot is {__instance.VisualSlot}.");
 
-        var autoAlignWeapon = ConfigureWeapon(__instance);
-        var autoAlignSheath = ConfigureSheath(__instance);
+        WeaponPrefabConfig.LoadConfigs(ConfigPath.Value);
 
-        // Sheath config has priority
-        var autoAlign = autoAlignSheath != AutoAlignType.None ? autoAlignSheath : autoAlignWeapon;
-
-        if (autoAlign != AutoAlignType.None)
-            AutoAlignWeaponSheath(__instance, autoAlign);
+        WeaponPrefabConfig.ApplyCorrections(__instance);
     }
 }
