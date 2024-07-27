@@ -3,7 +3,7 @@ using Kingmaker.UnitLogic.FactLogic;
 
 using MicroWrath;
 using MicroWrath.BlueprintsDb;
-using MicroWrath.InitContext;
+using MicroWrath.Deferred;
 using MicroWrath.Extensions;
 using MicroWrath.Extensions.Components;
 using MicroWrath.Localization;
@@ -31,7 +31,7 @@ namespace MiscTweaksAndFixes.Tweaks.MythicSuperiorSummoning
             //var context = new BlueprintInitializationContext(Triggers.BlueprintsCache_Init);
 
             var bp =
-                InitContext.NewBlueprint<BlueprintFeature>(GeneratedGuid.Get(nameof(MythicSuperiorSummoning)))
+                Deferred.NewBlueprint<BlueprintFeature>(GeneratedGuid.Get(nameof(MythicSuperiorSummoning)))
                     .Map(bp =>
                     {
                         MicroLogger.Debug(() => $"Add {nameof(MythicSuperiorSummoning)}");
@@ -51,7 +51,7 @@ namespace MiscTweaksAndFixes.Tweaks.MythicSuperiorSummoning
                     })
                     .AddOnTrigger(GeneratedGuid.MythicSuperiorSummoning, Triggers.BlueprintsCache_Init);
 
-            InitContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeatureSelection.MythicFeatSelection)
+            Deferred.GetBlueprint(BlueprintsDb.Owlcat.BlueprintFeatureSelection.MythicFeatSelection)
                 .Combine(bp)
                 .Map(bps =>
                 {

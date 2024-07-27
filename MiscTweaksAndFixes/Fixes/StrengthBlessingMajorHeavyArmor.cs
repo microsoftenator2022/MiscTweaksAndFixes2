@@ -11,9 +11,8 @@ using Kingmaker.UnitLogic.Buffs.Blueprints;
 
 using MicroWrath;
 using MicroWrath.BlueprintsDb;
-//using MicroWrath.BlueprintInitializationContext;
+using MicroWrath.Deferred;
 using MicroWrath.Extensions;
-using MicroWrath.InitContext;
 
 namespace MiscTweaksAndFixes.Fixes
 {
@@ -46,7 +45,7 @@ namespace MiscTweaksAndFixes.Fixes
         public static void Init()
         {
             //var context = 
-            InitContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintBuff.StrengthBlessingMajorBuff)
+            Deferred.GetBlueprint(BlueprintsDb.Owlcat.BlueprintBuff.StrengthBlessingMajorBuff)
                 .Map(buff =>
                 {
                     if (Enabled)

@@ -20,7 +20,7 @@ using MicroWrath.BlueprintsDb;
 //using MicroWrath.BlueprintInitializationContext;
 using MicroWrath.Extensions;
 using MicroWrath.Extensions.Components;
-using MicroWrath.InitContext;
+using MicroWrath.Deferred;
 using MicroWrath.Util;
 using MicroWrath.Util.Linq;
 
@@ -87,7 +87,7 @@ namespace MiscTweaksAndFixes.Tweaks
         internal static void Init()
         {
             var kineticistElementalFocusSelection = BlueprintsDb.Owlcat.BlueprintFeatureSelection.ElementalFocusSelection_1f3a15a3ae8a5524ab8b97f469bf4e3d;
-            InitContext.GetBlueprint(kineticistElementalFocusSelection)
+            Deferred.GetBlueprint(kineticistElementalFocusSelection)
                 .Map((BlueprintFeatureSelection s) => {
                     if (Enabled)
                     {

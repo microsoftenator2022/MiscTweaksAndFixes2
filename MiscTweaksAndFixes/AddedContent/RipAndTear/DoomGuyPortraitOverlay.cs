@@ -25,7 +25,7 @@ using MicroWrath;
 using MicroWrath.BlueprintsDb;
 using MicroWrath.Extensions;
 using MicroWrath.Extensions.Components;
-using MicroWrath.InitContext;
+using MicroWrath.Deferred;
 using MicroWrath.Util;
 using MicroWrath.Util.Linq;
 
@@ -718,7 +718,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
         {
             //var bic = new BlueprintInitializationContext(Triggers.BlueprintsCache_Init);
 
-            var buff = InitContext.NewBlueprint<BlueprintBuff>("03ABBCCA-C01C-4057-A183-9CB20B3D4C8C", "RipAndTearBuff")
+            var buff = Deferred.NewBlueprint<BlueprintBuff>("03ABBCCA-C01C-4057-A183-9CB20B3D4C8C", "RipAndTearBuff")
                 .Map(buff =>
                 {
                     buff.AddComponent<DoomGuyFaceOverlay>();
@@ -729,7 +729,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 })
                 .AddOnTrigger(BlueprintGuid.Parse("03ABBCCA-C01C-4057-A183-9CB20B3D4C8C"), Triggers.BlueprintsCache_Init);
 
-            var feature = InitContext.NewBlueprint<BlueprintFeature>("563B8476-B1FE-4314-8D1C-C567FEA0F537", "RipAndTearFeature")
+            var feature = Deferred.NewBlueprint<BlueprintFeature>("563B8476-B1FE-4314-8D1C-C567FEA0F537", "RipAndTearFeature")
                 .Combine(buff)
                 .Map(fb =>
                 {
@@ -746,7 +746,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 })
                 .AddOnTrigger(BlueprintGuid.Parse("563B8476-B1FE-4314-8D1C-C567FEA0F537"), Triggers.BlueprintsCache_Init);
 
-            var enchant = InitContext.NewBlueprint<BlueprintEquipmentEnchantment>("89BF4CDB-9C4D-462E-8271-86FA30B20B33", "RipAndTearEnchant")
+            var enchant = Deferred.NewBlueprint<BlueprintEquipmentEnchantment>("89BF4CDB-9C4D-462E-8271-86FA30B20B33", "RipAndTearEnchant")
                 .Combine(feature)
                 .Map(ef =>
                 {
@@ -763,7 +763,7 @@ namespace MiscTweaksAndFixes.AddedContent.RipAndTear
                 })
                 .AddOnTrigger(BlueprintGuid.Parse("89BF4CDB-9C4D-462E-8271-86FA30B20B33"), Triggers.BlueprintsCache_Init);
 
-            InitContext.GetBlueprint(BlueprintsDb.Owlcat.BlueprintItemEquipmentHead.KillerHelm_easterEgg)
+            Deferred.GetBlueprint(BlueprintsDb.Owlcat.BlueprintItemEquipmentHead.KillerHelm_easterEgg)
                 .Combine(enchant)
                 .Map(ie =>
                 {
