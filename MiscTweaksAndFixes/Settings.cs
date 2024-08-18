@@ -297,7 +297,7 @@ namespace MiscTweaksAndFixes
                 nameof(WeaponPrefabFixesToggle),
                 defaultValue: true,
                 description: Localized.WeaponPrefabFixesToggleDescription,
-                onChanged: value => WeaponPrefabOrientationFixes.Enabled = value);
+                onChanged: value => WeaponOffsetFixes.Enabled = value);
 
         [LocalizedString]
         public const string WeaponPrefabFixesEditModeToggleDescription = "Edit mode";
@@ -305,9 +305,9 @@ namespace MiscTweaksAndFixes
         private static Toggle WeaponPrefabFixesEditModeToggle =>
             CreateSettingToggle(
                 nameof(WeaponPrefabFixesEditModeToggle),
-                defaultValue: WeaponPrefabOrientationFixes.EditMode,
+                defaultValue: WeaponOffsetFixes.EditMode,
                 description: Localized.WeaponPrefabFixesEditModeToggleDescription,
-                onChanged: value => WeaponPrefabOrientationFixes.EditMode = value);
+                onChanged: value => WeaponOffsetFixes.EditMode = value);
 
         internal static void SettingsInit()
         {
